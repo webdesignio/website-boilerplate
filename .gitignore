@@ -1,0 +1,11 @@
+/node_modules/*
+/components/*
+!/components/.keep
+/pages/*
+!/pages/.keep
+/objects/*
+!/objects/.keep
+/.wdiorc.json
+/wdio.log
+/client.js
+/src/components/index.js

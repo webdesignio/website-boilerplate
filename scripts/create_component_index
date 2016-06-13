@@ -1,0 +1,27 @@
+#!/bin/bash
+
+trap 'rm src/components/*.tmp' EXIT
+for component in src/components/*.jsx; do
+  component_name=$(basename $component .jsx)
+  echo "import $component_name from './$component_name.jsx'" \
+    >> src/components/header.tmp
+  echo "  $component_name: reactComponent($component_name)," \
+    >> src/components/body.tmp
+done
+for component in src/components/*.js; do
+  component_name=$(basename $component .js)
+  if [[ $component_name == index ]]; then continue; fi
+  echo "import $component_name from './$component_name.jsx'" \
+    >> src/components/header.tmp
+  echo "  $component_name: $component_name," \
+    >> src/components/body.tmp
+done
+cat > src/components/index.js <<EOF
+import React from 'react'
+import ReactDOM from 'react-dom'
+$(cat src/components/header.tmp)
+const reactComponent = C => (props, el) => ReactDOM.render(React.createElement(C, props), el)
+export default {
+$(cat src/components/body.tmp)
+}
+EOF

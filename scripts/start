@@ -1,0 +1,11 @@
+#!/bin/bash
+
+trap 'kill $(jobs -p)' EXIT
+watch-run -i -p 'src/components/**,!src/components/index.js' \
+  scripts/create_component_index &
+watchify \
+  -t [ babelify --presets [ react es2015 ] ] \
+  -o client.js \
+  src/client.js \
+  -v &
+node server.js
