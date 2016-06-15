@@ -1,2 +1,6 @@
-import components from './components'
-console.log(components)
+import { findAndRender } from 'webdesignio';
+
+import components from './components';
+
+const initialState = { title: 'Initial title' };
+findAndRender(components, { initialState });
