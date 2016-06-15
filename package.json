@@ -29,6 +29,6 @@
     "uglify-js": "^2.6.2",
     "watch-run": "^1.2.4",
     "watchify": "^3.7.0",
-    "webdesignio": "webdesignio/webdesignio#feature/browser"
+    "webdesignio": "webdesignio/webdesignio"
   }
 }
