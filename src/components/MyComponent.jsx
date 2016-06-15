@@ -13,18 +13,18 @@ const renderInput = ({ onUpdate, content: { title } }) =>
 const renderB = ({ content: { title } }) =>
   <b>{title}</b>
 
-const renderButton = ({ setEditable }) =>
-  <button onClick={() => setEditable(false)}>Anzeigen</button>
-
 function MyComponent ({ onUpdate, setEditable, isEditable, content }) {
   return (
     <div className='my-component'>
+      <br />
+      <b>
+        This is my component which shows the same content as the component
+        above
+      </b>
+      <br />
       {isEditable
         ? renderInput({ onUpdate, content })
         : renderB({ content })}
-      <button onClick={() => setEditable(!isEditable)}>
-        {isEditable ? 'Anzeigen' : 'Editieren'}
-      </button>
     </div>
   )
 }
