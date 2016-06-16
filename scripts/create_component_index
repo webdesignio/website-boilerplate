@@ -1,27 +1,131 @@
-#!/bin/bash
+#!/usr/bin/env node
 
-trap 'rm src/components/*.tmp' EXIT
-for component in src/components/*.jsx; do
-  component_name=$(basename $component .jsx)
-  echo "import $component_name from './$component_name.jsx'" \
-    >> src/components/header.tmp
-  echo "  $component_name: reactComponent($component_name)," \
-    >> src/components/body.tmp
-done
-for component in src/components/*.js; do
-  component_name=$(basename $component .js)
-  if [[ $component_name == index ]]; then continue; fi
-  echo "import $component_name from './$component_name.jsx'" \
-    >> src/components/header.tmp
-  echo "  $component_name: $component_name," \
-    >> src/components/body.tmp
-done
-cat > src/components/index.js <<EOF
-import React from 'react'
-import ReactDOM from 'react-dom'
-$(cat src/components/header.tmp)
-const reactComponent = C => (props, el) => ReactDOM.render(React.createElement(C, props), el)
-export default {
-$(cat src/components/body.tmp)
+'use strict'
+
+const pkg = require(`${process.cwd()}/package.json`)
+const components = (pkg.wdio || {}).components || {}
+const builtinTransforms = {
+  react: {
+    imports: [
+      ['React', 'react'],
+      ['ReactDOM', 'react-dom']
+    ],
+    def: C => (props, el) => ReactDOM.render(React.createElement(C, props), el)
+  }
 }
-EOF
+const componentInfos = Object.keys(components)
+  .map(name => {
+    const path = getComponentPath(components[name])
+    const opts = getComponentOpts(components[name])
+    try {
+      const pkgJson = require(`${path}/package.json`)
+      return {
+        name,
+        path,
+        opts: Object.assign({}, opts, pkgJson.wdio || {})
+      }
+    } catch (e) {
+      return { name, path, opts }
+    }
+  })
+const transforms = componentInfos
+  .reduce((transforms, info) =>
+    info.opts.transform
+      ? transforms
+        .concat(
+          info.opts
+            .transform
+            .filter(t => transforms.indexOf(t) === -1)
+        )
+      : transforms,
+    []
+  )
+const transformAliases = transforms
+  .reduce(
+    (aliases, t, i) => Object.assign({}, aliases, { [t]: `t${i}` }),
+    {}
+  )
+const transformDefs = transforms
+  .map(t => genTransformDef(transformAliases[t], t))
+  .filter(t => !!t)
+const imports = transforms
+  .map(t => genTransformImport(transformAliases[t], t))
+  .filter(t => !!t)
+  .concat(
+    transformDefs
+      .reduce(
+        (ims, def) =>
+          ims.concat(
+            def.imports.filter(i => !containsImport(ims, i))
+          ),
+        []
+      )
+      .map(i => `import ${i[0]} from '${i[1]}'`)
+  )
+  .join('\n')
+const index = `${componentInfos
+  .map((info, i) =>
+    `import C${i} from '${info.path}'`
+  )
+  .join('\n')}
+${imports}
+${transformDefs
+  .map(d => d.def)
+  .join('\n')}
+export default {
+  ${componentInfos
+    .map((info, i) =>
+      `'${info.name}': ${
+        genApplyCode(
+          (info.opts.transform || [])
+            .map(t => transformAliases[t]),
+          `C${i}`
+        )
+      },`
+    )
+    .join('\n  ')}
+}`
+
+function genTransformImport (name, path) {
+  if (!builtinTransforms[path]) {
+    return `import ${transformAliases[t]} from '${t}'`
+  }
+  return null
+}
+
+function genTransformDef (name, path) {
+  if (builtinTransforms[path]) {
+    return {
+      def: `const ${name} = ${builtinTransforms[path].def.toString()}`,
+      imports: builtinTransforms[path].imports
+    }
+  }
+  return null
+}
+
+function genApplyCode (fns, arg) {
+  const fnCode = fns.reduce((code, fn) => `${code}${fn}(`, '')
+  const closingBrackets = fns.reduce(code => `${code})`, '')
+  return `${fnCode}${arg}${closingBrackets}`
+}
+
+function getComponentPath (o) {
+  return typeof o === 'string'
+    ? o
+    : o[0]
+}
+
+function getComponentOpts (o) {
+  return typeof o === 'string'
+    ? {}
+    : o[1]
+}
+
+function containsImport (imports, i) {
+  return imports.reduce((contains, _i) =>
+    contains || (_i[0] === i[0] && _i[1] === i[1]),
+    false
+  )
+}
+
+console.log(index)

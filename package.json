@@ -8,6 +8,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "scripts/build"
   },
+  "wdio": {
+    "components": {
+      "Inplace": ["./Inplace.jsx", { "transform": ["react"] }],
+      "MyComponent": ["./MyComponent.jsx", { "transform": ["react"] }],
+      "Toolbar": ["./Toolbar.jsx", { "transform": ["react"] }]
+    }
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

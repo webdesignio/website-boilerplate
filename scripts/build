@@ -27,7 +27,7 @@ EOF
 done
 
 echo "  Generating component index"
-scripts/create_component_index
+scripts/create_component_index > src/components/index.js
 echo "  Building client"
 browserify \
   -t [ babelify --presets [ react es2015 ] ] \

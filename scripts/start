@@ -2,7 +2,7 @@
 
 trap 'kill $(jobs -p)' EXIT
 watch-run -i -p 'src/components/**,!src/components/index.js' \
-  scripts/create_component_index &
+  scripts/create_component_index > src/components/index.js &
 watchify \
   -t [ babelify --presets [ react es2015 ] ] \
   -o client.js \
