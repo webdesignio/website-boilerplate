@@ -29,6 +29,7 @@ class Inplace extends Component {
         onBlur: this.onChange,
         contentEditable: true,
         className: this.props.className,
+        suppressContentEditableWarning: true,
         children: value
       })
     } else {
