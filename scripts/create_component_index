@@ -2,17 +2,10 @@
 
 'use strict'
 
+const builtinTransforms = require('./builtin_transforms')
 const pkg = require(`${process.cwd()}/package.json`)
+
 const components = (pkg.wdio || {}).components || {}
-const builtinTransforms = {
-  react: {
-    imports: [
-      ['React', 'react'],
-      ['ReactDOM', 'react-dom']
-    ],
-    def: C => (props, el) => ReactDOM.render(React.createElement(C, props), el)
-  }
-}
 const componentInfos = Object.keys(components)
   .map(name => {
     const path = getComponentPath(components[name])
@@ -95,8 +88,9 @@ function genTransformImport (name, path) {
 
 function genTransformDef (name, path) {
   if (builtinTransforms[path]) {
+    const transform = builtinTransforms[path]
     return {
-      def: `const ${name} = ${builtinTransforms[path].def.toString()}`,
+      def: `const ${name} = ${transform.dom.toString()}`,
       imports: builtinTransforms[path].imports
     }
   }
