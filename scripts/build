@@ -1,27 +1,21 @@
 #!/bin/bash
 
-trap 'rm -r components/tmp; rm components/__*__.tmp.js' EXIT
+trap 'rm components/__*__.tmp.js' EXIT
 echo "Starting build" > wdio.log
 echo "  Transpiling component files"
-babel --out-dir components/tmp --presets react -- src/components 2>&1 >>wdio.log
-
-for component in src/components/*.jsx; do
-  component_name=$(basename $component .jsx)
+babel --out-dir components/browserify/transpiled \
+  --ignore 'components/index.js' \
+  --presets react -- \
+  src/components 2>&1 >>wdio.log
+cp -R src/lib components/browserify/
+for component_name in $(scripts/list_components); do
   echo "  Building $component_name"
-  cat > components/__${component_name}__.tmp.js <<EOF
-import ReactDOM from 'react-dom/server'
-import $component_name from './tmp/$component_name'
-module.exports.renderToString = function renderToString (props) {
-  return ReactDOM.renderToStaticMarkup(
-    React.createElement($component_name, props)
-  )
-}
-EOF
+  scripts/create_component_proxy $component_name >components/browserify/${component_name}.js
   browserify \
     -o components/__${component_name}_m__.tmp.js \
     -t rollupify \
     -s ${component_name} \
-    components/__${component_name}__.tmp.js 2>> wdio.log
+    components/browserify/${component_name}.js 2>> wdio.log
   scripts/minify components/__${component_name}_m__.tmp.js \
     > components/${component_name}.js
 done

@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+'use strict'
+
+const pkg = require(`${process.cwd()}/package.json`)
+
+const components = (pkg.wdio || {}).components || {}
+console.log(Object.keys(components).join(' '))

@@ -1,0 +1,105 @@
+#!/usr/bin/env node
+
+'use strict'
+
+const { basename } = require('path')
+const builtinTransforms = require('./builtin_transforms')
+const pkg = require(`${process.cwd()}/package.json`)
+
+const name = process.argv[2]
+const components = (pkg.wdio || {}).components || {}
+const component = components[name]
+const createComponentInfo = component => {
+  const path = getComponentPath(component)
+  const opts = getComponentOpts(component)
+  try {
+    const pkgJson = require(`${path}/package.json`)
+    return {
+      name,
+      path,
+      opts: Object.assign({}, opts, pkgJson.wdio || {})
+    }
+  } catch (e) {
+    return { name, path, opts }
+  }
+}
+const componentInfo = createComponentInfo(component)
+const transforms = componentInfo.opts.transform || []
+const transformAliases = transforms
+  .reduce(
+    (aliases, t, i) => Object.assign({}, aliases, { [t]: `t${i}` }),
+    {}
+  )
+const transformDefs = transforms
+  .map(t => genTransformDef(transformAliases[t], t))
+  .filter(t => !!t)
+const imports = transforms
+  .map(t => genTransformImport(transformAliases[t], t))
+  .filter(t => !!t)
+  .concat(
+    transformDefs
+      .reduce(
+        (ims, def) =>
+          ims.concat(
+            def.imports.filter(i => !containsImport(ims, i))
+          ),
+        []
+      )
+      .map(i => `import ${i[0]} from '${i[1]}'`)
+  )
+  .join('\n')
+const index = `${imports}
+import C from './transpiled/${
+  basename(componentInfo.path).split('.').slice(0, -1)
+}'
+${transformDefs
+  .map(d => d.def)
+  .join('\n')}
+module.exports = ${
+  genApplyCode(transforms.map(t => transformAliases[t]), 'C')
+}`
+
+function genTransformImport (name, path) {
+  if (!builtinTransforms[path]) {
+    return `import { string as ${name} } from '${path}'`
+  }
+  return null
+}
+
+function genTransformDef (name, path) {
+  if (builtinTransforms[path]) {
+    const transform = builtinTransforms[path]
+    return {
+      def: `const ${name} = ${transform.string.toString()}`,
+      imports: builtinTransforms[path].imports.string
+    }
+  }
+  return null
+}
+
+function genApplyCode (fns, arg) {
+  const fnCode = fns.reduce((code, fn) => `${code}${fn}(`, '')
+  const closingBrackets = fns.reduce(code => `${code})`, '')
+  return `${fnCode}${arg}${closingBrackets}`
+}
+
+function getComponentPath (o) {
+  return typeof o === 'string'
+    ? o
+    : o[0]
+}
+
+function getComponentOpts (o) {
+  return typeof o === 'string'
+    ? {}
+    : o[1]
+}
+
+function containsImport (imports, i) {
+  return imports.reduce((contains, _i) =>
+    contains || (_i[0] === i[0] && _i[1] === i[1]),
+    false
+  )
+}
+
+console.log(index)
