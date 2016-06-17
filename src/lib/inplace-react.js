@@ -1,10 +1,8 @@
-'use strict';
+'use strict'
 
-const React = require('react');
+const React = require('react')
 
-exports.connect = connect;
-
-function connect(Child) {
+export function connect (Child) {
   class Connector extends React.Component {
     constructor (props) {
       super()
@@ -28,10 +26,10 @@ function connect(Child) {
 
   Connector.propTypes = {
     store: React.PropTypes.shape({
-      subscribe: React.PropTypes.func.isRequired,
+      subscribe: React.PropTypes.func.isRequired
     }),
     initialState: React.PropTypes.object.isRequired,
-    onUpdate: React.PropTypes.func,
+    onUpdate: React.PropTypes.func
   }
 
   return Connector
