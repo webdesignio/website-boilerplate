@@ -91,7 +91,7 @@ function genTransformDef (name, path) {
     const transform = builtinTransforms[path]
     return {
       def: `const ${name} = ${transform.dom.toString()}`,
-      imports: builtinTransforms[path].imports
+      imports: builtinTransforms[path].imports.dom
     }
   }
   return null
