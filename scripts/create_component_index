@@ -81,7 +81,7 @@ export default {
 
 function genTransformImport (name, path) {
   if (!builtinTransforms[path]) {
-    return `import ${transformAliases[t]} from '${t}'`
+    return `import { dom as ${name} } from '${path}'`
   }
   return null
 }
