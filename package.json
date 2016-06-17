@@ -10,9 +10,30 @@
   },
   "wdio": {
     "components": {
-      "Inplace": ["./Inplace.jsx", { "transform": ["react"] }],
-      "MyComponent": ["./MyComponent.jsx", { "transform": ["react"] }],
-      "Toolbar": ["./Toolbar.jsx", { "transform": ["react"] }]
+      "Inplace": [
+        "./Inplace.jsx",
+        {
+          "transform": [
+            "react"
+          ]
+        }
+      ],
+      "MyComponent": [
+        "./MyComponent.jsx",
+        {
+          "transform": [
+            "react"
+          ]
+        }
+      ],
+      "Toolbar": [
+        "./Toolbar.jsx",
+        {
+          "transform": [
+            "react"
+          ]
+        }
+      ]
     }
   },
   "keywords": [],
@@ -37,5 +58,8 @@
     "watch-run": "^1.2.4",
     "watchify": "^3.7.0",
     "webdesignio": "webdesignio/webdesignio"
+  },
+  "devDependencies": {
+    "standard": "^7.1.2"
   }
 }
