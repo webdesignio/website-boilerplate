@@ -14,5 +14,5 @@ const contentPath = parts.length === 1
 fetch(contentPath)
   .then(res => res.json())
   .then(({ data }) => {
-    findAndRender(components, { initialState: data })
+    findAndRender(components, { initialContent: data })
   })
