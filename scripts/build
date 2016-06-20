@@ -1,6 +1,7 @@
 #!/bin/bash
 
 trap 'rm components/__*__.tmp.js' EXIT
+export NODE_ENV=production
 echo "Starting build" > wdio.log
 echo "  Transpiling component files"
 babel --out-dir components/browserify/transpiled \
@@ -26,6 +27,7 @@ echo "  Building client"
 browserify \
   -s CMS \
   -t [ babelify --presets [ react es2015 ] ] \
+  -t envify \
   -o client.js \
   src/client.js 2>&1 >> wdio.log
 echo "  Building pages"
