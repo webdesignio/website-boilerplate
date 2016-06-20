@@ -22,7 +22,7 @@ app.get('/:type/new', (req, res, next) => {
   const o = new _Object({ data: {} })
   res.render(`objects/${req.params.type}`, (err, html) => {
     if (err) return next(err)
-    res.send(renderTemplate(o.data, html))
+    res.send(renderTemplate(o, html))
   })
 })
 
@@ -34,7 +34,7 @@ app.get('/:type/:object', (req, res, next) => {
       new Promise((resolve, reject) => {
         res.render(`objects/${req.params.type}`, (err, html) => {
           if (err) return reject(err)
-          resolve(renderTemplate(object.data, html))
+          resolve(renderTemplate(object, html))
         })
       })
     )
@@ -53,7 +53,7 @@ app.get(/\/([^/]*)/, (req, res, next) => {
       new Promise((resolve, reject) => {
         res.render(`pages/${pageID}`, (err, html) => {
           if (err) return reject(err)
-          resolve(renderTemplate(page.data, html))
+          resolve(renderTemplate(page, html))
         })
       })
     )
