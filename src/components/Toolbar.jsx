@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { setEditable } from '../lib/webdesignio/actions'
+import { setEditable } from 'webdesignio-floorman/actions'
 
 const styles = {
   root: {

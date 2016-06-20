@@ -2,8 +2,12 @@
 
 import 'whatwg-fetch'
 import { parse } from 'url'
-import { findAndRender } from './lib/webdesignio'
-import { save as saveAction, saveSuccess, saveFailure } from './lib/webdesignio/actions'
+import { findAndRender } from 'webdesignio-floorman'
+import {
+  save as saveAction,
+  saveSuccess,
+  saveFailure
+} from 'webdesignio-floorman/actions'
 
 import components from './components'
 

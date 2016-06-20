@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom'
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import { updateRecord } from '../lib/webdesignio/actions'
+import { updateRecord } from 'webdesignio-floorman/actions'
 
 class Inplace extends Component {
   constructor () {

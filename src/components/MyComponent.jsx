@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { updateRecord } from '../lib/webdesignio/actions'
+import { updateRecord } from 'webdesignio-floorman/actions'
 
 const renderInput = ({ onChange, value }) =>
   <input
