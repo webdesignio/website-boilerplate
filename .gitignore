@@ -9,3 +9,5 @@
 /wdio.log
 /client.js
 /src/components/index.js
+/data/*
+!/data/.keep
