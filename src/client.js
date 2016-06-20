@@ -2,7 +2,8 @@
 
 import 'whatwg-fetch'
 import { parse } from 'url'
-import { createProps, renderAll, findAll } from 'webdesignio'
+import { findAndRender } from './lib/webdesignio'
+import { save as saveAction, saveSuccess, saveFailure } from './lib/webdesignio/actions'
 
 import components from './components'
 
@@ -12,17 +13,16 @@ const putLocation = pathname === '/'
   : pathname
 
 export default function bootstrap (record) {
-  const props = createProps({ record })
-  renderAll(findAll(components), props)
+  const store = findAndRender(components, { record })
   if (process.env.NODE_ENV !== 'production') {
     const saveButton = document.querySelector('#save')
     if (!saveButton) return alert('No save button found :(')
-    console.log(saveButton)
-    saveButton.onclick = save.bind(null, props)
+    saveButton.onclick = save.bind(null, store)
   }
 }
 
-function save ({ store }) {
+function save (store) {
+  store.dispatch(saveAction())
   const { record } = store.getState()
   fetch(putLocation, {
     method: 'PUT',
@@ -31,4 +31,7 @@ function save ({ store }) {
     }),
     body: JSON.stringify(record)
   })
+  .then(res => res.json())
+  .then(record => store.dispatch(saveSuccess(record)))
+  .catch(e => store.dispatch(saveFailure(e)))
 }

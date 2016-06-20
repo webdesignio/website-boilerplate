@@ -1,6 +1,7 @@
 import React from 'react'
+import { connect } from 'react-redux'
 
-import { connect } from '../lib/inplace-react'
+import { setEditable } from '../lib/webdesignio/actions'
 
 const styles = {
   root: {
@@ -21,12 +22,12 @@ const styles = {
   }
 }
 
-function Toolbar ({ isEditable, setEditable }) {
+function Toolbar ({ isEditable, onClickToggle }) {
   return (
     <div style={styles.root}>
       <div
         style={styles.button}
-        onClick={() => setEditable(!isEditable)}
+        onClick={e => onClickToggle(isEditable, e)}
       >
         {isEditable ? 'Anzeigen' : 'Editieren'}
       </div>
@@ -40,4 +41,17 @@ function Toolbar ({ isEditable, setEditable }) {
   )
 }
 
-export default connect(Toolbar)
+function mapStateToProps ({ isEditable }) {
+  return { isEditable }
+}
+
+function mapDispatchToProps (dispatch) {
+  return {
+    onClickToggle (isEditable, e) {
+      e.preventDefault()
+      dispatch(setEditable(!isEditable))
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Toolbar)

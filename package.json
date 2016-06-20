@@ -53,6 +53,8 @@
     "pug-cli": "^1.0.0-alpha6",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
+    "react-redux": "^4.4.5",
+    "redux": "^3.5.2",
     "rollupify": "^0.3.1",
     "shift-codegen": "^5.0.2",
     "shift-parser": "^5.0.1",

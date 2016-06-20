@@ -1,19 +1,20 @@
 import React from 'react'
+import { connect } from 'react-redux'
 
-import { connect } from '../lib/inplace-react'
+import { updateRecord } from '../lib/webdesignio/actions'
 
-const renderInput = ({ onUpdate, content: { title } }) =>
+const renderInput = ({ onChange, value }) =>
   <input
     type='text'
-    value={title || ''}
+    value={value || ''}
     placeholder='Type it'
-    onChange={e => onUpdate({ title: e.target.value })}
+    onChange={onChange}
   />
 
-const renderB = ({ content: { title } }) =>
-  <b>{title}</b>
+const renderB = ({ value }) =>
+  <b>{value}</b>
 
-function MyComponent ({ onUpdate, setEditable, isEditable, content }) {
+function MyComponent ({ onChange, isEditable, value }) {
   return (
     <div className='my-component'>
       <br />
@@ -23,10 +24,26 @@ function MyComponent ({ onUpdate, setEditable, isEditable, content }) {
       </b>
       <br />
       {isEditable
-        ? renderInput({ onUpdate, content })
-        : renderB({ content })}
+        ? renderInput({ onChange, value })
+        : renderB({ value })}
     </div>
   )
 }
 
-export default connect(MyComponent)
+function mapStateToProps ({ isEditable, record }) {
+  const { data: { title: value } } = record
+  return {
+    isEditable,
+    value
+  }
+}
+
+function mapDispatchToProps (dispatch) {
+  return {
+    onChange (e) {
+      dispatch(updateRecord({ title: e.target.value }))
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(MyComponent)

@@ -1,6 +1,8 @@
 import ReactDOM from 'react-dom'
 import React, { Component } from 'react'
-import { connect } from '../lib/inplace-react'
+import { connect } from 'react-redux'
+
+import { updateRecord } from '../lib/webdesignio/actions'
 
 class Inplace extends Component {
   constructor () {
@@ -9,20 +11,22 @@ class Inplace extends Component {
   }
 
   shouldComponentUpdate (nextProps) {
-    return nextProps.value !== ReactDOM.findDOMNode(this).textContent
+    return (
+      nextProps.value !== ReactDOM.findDOMNode(this).textContent
+    ) || this.props.isEditable !== nextProps.isEditable
   }
 
   onChange () {
     const html = ReactDOM.findDOMNode(this).textContent
     if (html !== this.lastHtml) {
-      this.props.onUpdate({ [this.props.name]: html })
+      this.props.onUpdate(html)
     }
     this.lastHtml = html
   }
 
   render () {
     const tag = this.props.tag || 'div'
-    const { content: { [this.props.name]: value } } = this.props
+    const { value } = this.props
     if (this.props.isEditable) {
       return React.createElement(tag, {
         onInput: this.onChange,
@@ -41,4 +45,20 @@ class Inplace extends Component {
   }
 }
 
-export default connect(Inplace)
+function mapStateToProps ({ isEditable, record }, { name }) {
+  const { data: { [name]: value } } = record
+  return {
+    isEditable,
+    value
+  }
+}
+
+function mapDispatchToProps (dispatch, { name }) {
+  return {
+    onUpdate (value) {
+      dispatch(updateRecord({ [name]: value }))
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Inplace)
