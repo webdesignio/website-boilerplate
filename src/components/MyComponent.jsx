@@ -1,11 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { updateRecord } from 'webdesignio-floorman/actions'
+import { updateRecord } from '@webdesignio/floorman/actions'
 import {
   createValueSelector,
   isEditable
-} from 'webdesignio-floorman/selectors'
+} from '@webdesignio/floorman/selectors'
 
 const renderInput = ({ onChange, value }) =>
   <input

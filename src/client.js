@@ -1,8 +1,8 @@
 /* global alert */
 
 import 'whatwg-fetch'
-import { findAndRender } from 'webdesignio-floorman'
-import { save as saveAction } from 'webdesignio-floorman/actions'
+import { findAndRender } from '@webdesignio/floorman'
+import { save as saveAction } from '@webdesignio/floorman/actions'
 
 import components from './components'
 

@@ -2,11 +2,11 @@ import ReactDOM from 'react-dom'
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import { updateRecord } from 'webdesignio-floorman/actions'
+import { updateRecord } from '@webdesignio/floorman/actions'
 import {
   createValueSelector,
   isEditable
-} from 'webdesignio-floorman/selectors'
+} from '@webdesignio/floorman/selectors'
 
 class Inplace extends Component {
   constructor () {
