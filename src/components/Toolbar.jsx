@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 import { setEditable } from 'webdesignio-floorman/actions'
+import { isEditable } from 'webdesignio-floorman/selectors'
 
 const styles = {
   root: {
@@ -41,8 +42,10 @@ function Toolbar ({ isEditable, onClickToggle }) {
   )
 }
 
-function mapStateToProps ({ isEditable }) {
-  return { isEditable }
+function mapStateToProps (state) {
+  return {
+    isEditable: isEditable(state)
+  }
 }
 
 function mapDispatchToProps (dispatch) {

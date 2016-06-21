@@ -3,6 +3,10 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
 import { updateRecord } from 'webdesignio-floorman/actions'
+import {
+  createValueSelector,
+  isEditable
+} from 'webdesignio-floorman/selectors'
 
 class Inplace extends Component {
   constructor () {
@@ -45,11 +49,11 @@ class Inplace extends Component {
   }
 }
 
-function mapStateToProps ({ isEditable, record }, { name }) {
-  const { data: { [name]: value } } = record
+function mapStateToProps (state, { name }) {
+  const value = createValueSelector(name)
   return {
-    isEditable,
-    value
+    isEditable: isEditable(state),
+    value: value(state)
   }
 }
 

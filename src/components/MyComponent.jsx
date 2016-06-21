@@ -2,6 +2,10 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 import { updateRecord } from 'webdesignio-floorman/actions'
+import {
+  createValueSelector,
+  isEditable
+} from 'webdesignio-floorman/selectors'
 
 const renderInput = ({ onChange, value }) =>
   <input
@@ -30,11 +34,11 @@ function MyComponent ({ onChange, isEditable, value }) {
   )
 }
 
-function mapStateToProps ({ isEditable, record }) {
-  const { data: { title: value } } = record
+function mapStateToProps (state) {
+  const value = createValueSelector('title')
   return {
-    isEditable,
-    value
+    isEditable: isEditable(state),
+    value: value(state)
   }
 }
 
