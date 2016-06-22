@@ -9,6 +9,9 @@
     "build": "scripts/build"
   },
   "wdio": {
+    "globals": {
+      "title": ""
+    },
     "components": {
       "Inplace": [
         "./Inplace.jsx",
@@ -40,7 +43,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@webdesignio/floorman": "0.0.0",
+    "@webdesignio/core": "0.0.0",
+    "@webdesignio/floorman": "0.1.1",
     "babel-cli": "^6.10.1",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.5.0",
@@ -62,7 +66,6 @@
     "uglify-js": "^2.6.2",
     "watch-run": "^1.2.4",
     "watchify": "^3.7.0",
-    "webdesignio": "github:webdesignio/webdesignio",
     "whatwg-fetch": "^1.0.0"
   },
   "devDependencies": {

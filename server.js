@@ -3,10 +3,12 @@
 const http = require('http')
 const express = require('express')
 const chalk = require('chalk')
-const { Page, Object: _Object, renderTemplate } = require('webdesignio')
 const mongoose = require('mongoose')
+const { models, renderTemplate } = require('@webdesignio/core')
 const error = require('http-errors')
 const { json } = require('body-parser')
+
+const { Page, Object: _Object, Website } = models(mongoose)
 
 mongoose.Promise = Promise
 mongoose.connect('mongodb://localhost/webdesignio')
@@ -21,53 +23,61 @@ app.get('/static/client.js', (req, res) => {
 
 app.get('/:type/new', (req, res, next) => {
   const o = new _Object({ data: {} })
-  res.render(`objects/${req.params.type}`, (err, html) => {
-    if (err) return next(err)
-    res.send(renderTemplate(o, html))
-  })
+  getWebsite()
+    .then(({ globals }) => globals || {})
+    .then(
+      globals => {
+        res.render(`objects/${req.params.type}`, (err, html) => {
+          if (err) return next(err)
+          res.send(renderTemplate({ record: o, globals }, html))
+        })
+      },
+      next
+    )
 })
 
 app.get('/:type/:object', (req, res, next) => {
   const { params } = req
-  _Object.findById(params.object)
-    .then(object => object == null ? Promise.reject(error(404)) : object)
-    .then(object =>
-      new Promise((resolve, reject) => {
-        res.render(`objects/${req.params.type}`, (err, html) => {
-          if (err) return reject(err)
-          resolve(renderTemplate(object, html))
-        })
-      })
+  getWebsite()
+    .then(({ globals }) => globals || {})
+    .then(globals =>
+      _Object.findById(params.object)
+        .then(object => object == null ? Promise.reject(error(404)) : object)
+        .then(object =>
+          renderView(res, `objects/${req.params.type}`, {
+            record: object,
+            globals
+          })
+        )
     )
-    .then(html => res.send(html))
-    .catch(next)
+    .then(html => res.send(html), next)
 })
 
-app.get(/\/([^/]*)/, (req, res, next) => {
+app.get(/\/([^/.]*)/, (req, res, next) => {
   const { params } = req
   const pageID = params[0] || 'index'
   const createPage = () =>
     new Page({ _id: pageID, data: {} })
-  Page.findById(pageID)
-    .then(page => page == null ? createPage() : page)
-    .then(page =>
-      new Promise((resolve, reject) => {
-        res.render(`pages/${pageID}`, (err, html) => {
-          if (err) return reject(err)
-          resolve(renderTemplate(page, html))
-        })
-      })
+  getWebsite()
+    .then(({ globals }) =>
+      Page.findById(pageID)
+        .then(page => page == null ? createPage() : page)
+        .then(page =>
+          renderView(res, `pages/${pageID}`, { record: page, globals })
+        )
     )
-    .then(html => res.send(html))
-    .catch(next)
+    .then(html => res.send(html), next)
 })
 
 app.put('/:type/:object', json(), (req, res, next) => {
   const { params } = req
   const body = Object.assign({}, req.body, { _id: params.object })
-  _Object.findOne({ _id: params.object, type: params.type })
+  updateWebsite({ globals: body.globals })
+    .then(() => _Object.findOne({ _id: params.object, type: params.type }))
     .then(object =>
-      object == null ? new _Object(body) : Object.assign(object, body)
+      object == null
+        ? new _Object(body.record)
+        : Object.assign(object, body.record)
     )
     .then(object => object.save())
     .then(object => res.send(object), next)
@@ -76,7 +86,8 @@ app.put('/:type/:object', json(), (req, res, next) => {
 app.put('/:page', json(), (req, res, next) => {
   const { params } = req
   const body = Object.assign({}, req.body, { _id: params.page })
-  Page.findById(params.page)
+  updateWebsite({ globals: body.globals })
+    .then(() => Page.findById(params.page))
     .then(page => page == null ? new Page(body) : Object.assign(page, body))
     .then(page => page.save())
     .then(page => res.send(page), next)
@@ -97,3 +108,30 @@ srv.listen(process.env.PORT || 3000, () => {
   )
   console.log()
 })
+
+function getWebsite () {
+  return Website.findOne({})
+    .then(website => {
+      return website != null
+        ? website
+        : new Website({
+          _id: 'my-site',
+          globals: require('./package.json').wdio.globals
+        })
+    })
+}
+
+function updateWebsite (data) {
+  return getWebsite()
+    .then(website => Object.assign(website, data))
+    .then(website => website.save())
+}
+
+function renderView (res, path, o) {
+  return new Promise((resolve, reject) => {
+    res.render(path, (err, html) => {
+      if (err) return reject(err)
+      resolve(renderTemplate(html, o))
+    })
+  })
+}

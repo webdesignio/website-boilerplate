@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { updateRecord } from '@webdesignio/floorman/actions'
+import { update } from '@webdesignio/floorman/actions'
 import {
   createValueSelector,
   isEditable
@@ -45,7 +45,7 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
   return {
     onChange (e) {
-      dispatch(updateRecord({ title: e.target.value }))
+      dispatch(update({ title: e.target.value }))
     }
   }
 }

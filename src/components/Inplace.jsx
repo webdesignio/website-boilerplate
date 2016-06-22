@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom'
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import { updateRecord } from '@webdesignio/floorman/actions'
+import { update } from '@webdesignio/floorman/actions'
 import {
   createValueSelector,
   isEditable
@@ -60,7 +60,7 @@ function mapStateToProps (state, { name }) {
 function mapDispatchToProps (dispatch, { name }) {
   return {
     onUpdate (value) {
-      dispatch(updateRecord({ [name]: value }))
+      dispatch(update({ [name]: value }))
     }
   }
 }
