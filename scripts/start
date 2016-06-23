@@ -12,4 +12,5 @@ watchify \
   -o client.js \
   src/client.js \
   -v &
-node-dev server.js
+node-inspector &
+node-dev --debug server.js
