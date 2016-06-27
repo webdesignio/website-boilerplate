@@ -1,9 +1,7 @@
-doctype html
-html
-  head
-  body
+extends ../includes/base
+
+block content
+  .container
     h1 Foobar
     div(data-component='Inplace' data-props='{"name":"title"}')
     div(data-component='MyComponent')
-    div(data-component='Toolbar')
-    script(data-cms)

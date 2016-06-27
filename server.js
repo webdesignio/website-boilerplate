@@ -1,5 +1,6 @@
 'use strict'
 
+const { readFileSync } = require('fs')
 const http = require('http')
 const express = require('express')
 const chalk = require('chalk')
@@ -17,40 +18,22 @@ const app = express()
 app.set('view engine', 'pug')
 app.set('views', 'src')
 
+app.use(express.static(`${__dirname}/static`))
+
 app.get('/static/client.js', (req, res) => {
   res.sendFile(`${process.cwd()}/client.js`)
 })
 
 app.get('/:type/new', (req, res, next) => {
-  const o = new _Object({ data: {} })
-  getWebsite()
-    .then(({ globals }) => globals || {})
-    .then(
-      globals => {
-        res.render(`objects/${req.params.type}`, (err, html) => {
-          if (err) return next(err)
-          res.send(renderTemplate({ record: o, globals }, html))
-        })
-      },
-      next
-    )
+  const o = new _Object({ type: req.params.type, data: {} })
+  render(res, o).catch(next)
 })
 
 app.get('/:type/:object', (req, res, next) => {
   const { params } = req
-  getWebsite()
-    .then(({ globals }) => globals || {})
-    .then(globals =>
-      _Object.findById(params.object)
-        .then(object => object == null ? Promise.reject(error(404)) : object)
-        .then(object =>
-          renderView(res, `objects/${req.params.type}`, {
-            record: object,
-            globals
-          })
-        )
-    )
-    .then(html => res.send(html), next)
+  _Object.findById(params.object)
+    .then(object => object == null ? Promise.reject(error(404)) : object)
+    .then(object => render(res, object))
 })
 
 app.get(/\/([^/.]*)/, (req, res, next) => {
@@ -58,26 +41,29 @@ app.get(/\/([^/.]*)/, (req, res, next) => {
   const pageID = params[0] || 'index'
   const createPage = () =>
     new Page({ _id: pageID, data: {} })
-  getWebsite()
-    .then(({ globals }) =>
-      Page.findById(pageID)
-        .then(page => page == null ? createPage() : page)
-        .then(page =>
-          renderView(res, `pages/${pageID}`, { record: page, globals })
-        )
-    )
-    .then(html => res.send(html), next)
+  Page.findById(pageID)
+    .then(page => page == null ? createPage() : page)
+    .then(page => render(res, page))
+    .catch(next)
 })
 
 app.put('/:type/:object', json(), (req, res, next) => {
   const { params } = req
-  const body = Object.assign({}, req.body, { _id: params.object })
-  updateWebsite({ globals: body.globals })
+  const record = Object.assign({}, req.body.record, { _id: params.object })
+  const globals = Object.keys(readPackageJSON().globals)
+    .reduce(
+      (globals, key) =>
+        Object.assign({}, globals, {
+          [key]: (req.body.globals || {})[key] || null
+        }),
+      {}
+    )
+  updateWebsite({ globals })
     .then(() => _Object.findOne({ _id: params.object, type: params.type }))
     .then(object =>
       object == null
-        ? new _Object(body.record)
-        : Object.assign(object, body.record)
+        ? new _Object(record)
+        : Object.assign(object, record)
     )
     .then(object => object.save())
     .then(object => res.send(object), next)
@@ -85,10 +71,20 @@ app.put('/:type/:object', json(), (req, res, next) => {
 
 app.put('/:page', json(), (req, res, next) => {
   const { params } = req
-  const body = Object.assign({}, req.body, { _id: params.page })
-  updateWebsite({ globals: body.globals })
+  const record = Object.assign({}, req.body.record, { _id: params.page })
+  const globals = Object.keys(readPackageJSON().globals)
+    .reduce(
+      (globals, key) =>
+        Object.assign({}, globals, {
+          [key]: (req.body.globals || {})[key] || null
+        }),
+      {}
+    )
+  updateWebsite({ globals })
     .then(() => Page.findById(params.page))
-    .then(page => page == null ? new Page(body) : Object.assign(page, body))
+    .then(page => page == null
+      ? new Page(record)
+      : Object.assign(page, record))
     .then(page => page.save())
     .then(page => res.send(page), next)
 })
@@ -111,14 +107,12 @@ srv.listen(process.env.PORT || 3000, () => {
 
 function getWebsite () {
   return Website.findOne({})
-    .then(website => {
-      return website != null
+    .then(website =>
+      website != null
         ? website
-        : new Website({
-          _id: 'my-site',
-          globals: require('./package.json').wdio.globals
-        })
-    })
+        : new Website({ _id: 'my-site' })
+    )
+    .then(patchWebsite)
 }
 
 function updateWebsite (data) {
@@ -127,11 +121,50 @@ function updateWebsite (data) {
     .then(website => website.save())
 }
 
+function render (res, record) {
+  const view = record.collection.name === 'objects'
+    ? `objects/${record.type}`
+    : `pages/${record._id}`
+  return getWebsite()
+    .then(({ globals, currentLanguage, defaultLanguage, languages }) =>
+      renderView(res, view, {
+        record,
+        globals,
+        currentLanguage,
+        defaultLanguage,
+        languages
+      })
+    )
+    .then(html => res.send(html))
+}
+
 function renderView (res, path, o) {
   return new Promise((resolve, reject) => {
     res.render(path, (err, html) => {
       if (err) return reject(err)
       resolve(renderTemplate(html, o))
     })
+  })
+}
+
+function readPackageJSON () {
+  return JSON.parse(readFileSync(`${__dirname}/package.json`, 'utf-8')).wdio
+}
+
+// Mutates the website!
+function patchWebsite (website) {
+  const { languages, defaultLanguage } = readPackageJSON()
+  const globals = Object.keys(readPackageJSON().globals)
+    .reduce(
+      (globals, key) =>
+        Object.assign({}, globals, {
+          [key]: (website.globals || {})[key] || null
+        }),
+      {}
+    )
+  return Object.assign(website, {
+    globals,
+    languages,
+    defaultLanguage
   })
 }
