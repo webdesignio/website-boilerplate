@@ -16,14 +16,6 @@ const styles = {
     position: 'absolute',
     bottom: 0,
     left: 0
-  },
-
-  button: {
-    display: 'inline-block',
-    cursor: 'pointer',
-    border: 'solid 1px black',
-    padding: '5px',
-    backgroundColor: 'white'
   }
 }
 
@@ -49,7 +41,7 @@ function Toolbar ({
           onChange={onChangeLanguage}
         >
           {languages.map(lang =>
-            <option value={lang}>{lang.toUpperCase()}</option>
+            <option key={lang} value={lang}>{lang.toUpperCase()}</option>
           )}
         </select>
       </div>
