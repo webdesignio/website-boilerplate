@@ -153,8 +153,12 @@ function readPackageJSON () {
 
 // Mutates the website!
 function patchWebsite (website) {
-  const { languages, defaultLanguage } = readPackageJSON()
-  const globals = Object.keys(readPackageJSON().globals)
+  const {
+    languages,
+    defaultLanguage,
+    noLangFields
+  } = readPackageJSON()
+  const globals = Object.keys(readPackageJSON().globals || {})
     .reduce(
       (globals, key) =>
         Object.assign({}, globals, {
@@ -165,6 +169,7 @@ function patchWebsite (website) {
   return Object.assign(website, {
     globals,
     languages,
-    defaultLanguage
+    defaultLanguage,
+    noLangFields
   })
 }
