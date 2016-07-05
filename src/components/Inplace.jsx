@@ -49,12 +49,12 @@ class Inplace extends Component {
   }
 }
 
-function mapStateToProps (state, { name }) {
-  const value = createValueSelector(name)
-  return {
+function mapStateToProps () {
+  const value = createValueSelector()
+  return (state, { name }) => ({
     isEditable: isEditable(state),
-    value: value(state)
-  }
+    value: value(state, name)
+  })
 }
 
 function mapDispatchToProps (dispatch, { name }) {

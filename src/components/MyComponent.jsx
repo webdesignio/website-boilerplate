@@ -35,11 +35,11 @@ function MyComponent ({ onChange, isEditable, value }) {
 }
 
 function mapStateToProps (state) {
-  const value = createValueSelector('title')
-  return {
+  const value = createValueSelector()
+  return (state) => ({
     isEditable: isEditable(state),
-    value: value(state)
-  }
+    value: value(state, 'title')
+  })
 }
 
 function mapDispatchToProps (dispatch) {

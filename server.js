@@ -1,6 +1,6 @@
 'use strict'
 
-const { readFileSync } = require('fs')
+const { readFileSync, existsSync } = require('fs')
 const http = require('http')
 const express = require('express')
 const chalk = require('chalk')
@@ -125,11 +125,16 @@ function render (res, record) {
   const view = record.collection.name === 'objects'
     ? `objects/${record.type}`
     : `pages/${record._id}`
+  let meta = {}
+  if (existsSync(`src/${view}.meta.json`)) {
+    meta = JSON.parse(readFileSync(`src/${view}.meta.json`))
+  }
+  meta = Object.assign({}, { noLangFields: [] }, meta)
   return getWebsite()
     .then(({ globals, currentLanguage, defaultLanguage, languages }) =>
       renderView(res, view, {
-        record,
-        globals,
+        locals: Object.assign({}, meta, { fields: record.data }),
+        globals: { fields: globals, noLangFields: readPackageJSON().noLangFields || [] },
         currentLanguage,
         defaultLanguage,
         languages
