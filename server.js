@@ -133,11 +133,14 @@ function render (res, record) {
   return getWebsite()
     .then(({ globals, currentLanguage, defaultLanguage, languages }) =>
       renderView(res, view, {
-        locals: Object.assign({}, meta, { fields: record.data }),
-        globals: { fields: globals, noLangFields: readPackageJSON().noLangFields || [] },
-        currentLanguage,
-        defaultLanguage,
-        languages
+        meta,
+        record,
+        website: {
+          fields: globals,
+          noLangFields: readPackageJSON().noLangFields || [],
+          defaultLanguage,
+          languages
+        }
       })
     )
     .then(html => res.send(html))
