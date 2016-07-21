@@ -32,6 +32,8 @@ browserify \
   src/client.js 2>&1 >> wdio.log
 echo "  Building pages"
 pug -o pages src/pages
+cp src/pages/*.meta.json pages 2>/dev/null
 echo "  Building objects"
 pug -o objects src/objects
+cp src/objects/*.meta.json objects 2>/dev/null
 echo
