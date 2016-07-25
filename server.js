@@ -156,7 +156,7 @@ function renderView (res, path, o) {
 }
 
 function readPackageJSON () {
-  return JSON.parse(readFileSync(`${__dirname}/package.json`, 'utf-8')).wdio
+  return JSON.parse(readFileSync(`${__dirname}/package.json`, 'utf-8')).webdesignio
 }
 
 // Mutates the website!

@@ -4,5 +4,5 @@
 
 const pkg = require(`${process.cwd()}/package.json`)
 
-const components = (pkg.wdio || {}).components || {}
+const components = (pkg.webdesignio || {}).components || {}
 console.log(Object.keys(components).join(' '))

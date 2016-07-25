@@ -5,8 +5,8 @@
 !/pages/.keep
 /objects/*
 !/objects/.keep
-/.wdiorc.json
-/wdio.log
+/.webdesigniorc.json
+/webdesignio.log
 /client.js
 /src/components/index.js
 /data/*

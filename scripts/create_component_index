@@ -5,7 +5,7 @@
 const builtinTransforms = require('./builtin_transforms')
 const pkg = require(`${process.cwd()}/package.json`)
 
-const components = (pkg.wdio || {}).components || {}
+const components = (pkg.webdesignio || {}).components || {}
 const componentInfos = Object.keys(components)
   .map(name => {
     const path = getComponentPath(components[name])
@@ -15,7 +15,7 @@ const componentInfos = Object.keys(components)
       return {
         name,
         path,
-        opts: Object.assign({}, opts, pkgJson.wdio || {})
+        opts: Object.assign({}, opts, pkgJson.webdesignio || {})
       }
     } catch (e) {
       return { name, path, opts }

@@ -2,12 +2,12 @@
 
 trap 'rm components/__*__.tmp.js' EXIT
 export NODE_ENV=production
-echo "Starting build" > wdio.log
+echo "Starting build" > webdesignio.log
 echo "  Transpiling component files"
 babel --out-dir components/browserify/transpiled \
   --ignore 'components/index.js' \
   --presets react -- \
-  src/components 2>&1 >>wdio.log
+  src/components 2>&1 >>webdesignio.log
 cp -R src/lib components/browserify/
 for component_name in $(scripts/list_components); do
   echo "  Building $component_name"
@@ -16,7 +16,7 @@ for component_name in $(scripts/list_components); do
     -o components/__${component_name}_m__.tmp.js \
     -t rollupify \
     -s ${component_name} \
-    components/browserify/${component_name}.js 2>> wdio.log
+    components/browserify/${component_name}.js 2>> webdesignio.log
   scripts/minify components/__${component_name}_m__.tmp.js \
     > components/${component_name}.js
 done
@@ -29,7 +29,7 @@ browserify \
   -t [ babelify --presets [ react es2015 ] ] \
   -t envify \
   -o client.js \
-  src/client.js 2>&1 >> wdio.log
+  src/client.js 2>&1 >> webdesignio.log
 echo "  Building pages"
 pug -o pages src/pages
 cp src/pages/*.meta.json pages 2>/dev/null
