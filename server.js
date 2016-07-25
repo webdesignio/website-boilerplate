@@ -3,13 +3,32 @@
 const { readFileSync, existsSync } = require('fs')
 const http = require('http')
 const express = require('express')
+const cors = require('cors')
 const chalk = require('chalk')
 const mongoose = require('mongoose')
-const { models, renderTemplate } = require('@webdesignio/core')
 const error = require('http-errors')
 const { json } = require('body-parser')
 
-const { Page, Object: _Object, Website } = models(mongoose)
+const Website = mongoose.model('websites', new mongoose.Schema({
+  _id: { type: String, required: true, unique: true },
+  defaultLanguage: { type: String, required: true },
+  languages: { type: [String], required: true },
+  noLangFields: { type: [String], required: true },
+  fields: { type: {}, required: true }
+}, { minimize: false }))
+
+const Page = mongoose.model('pages', new mongoose.Schema({
+  _id: { type: String, required: true, unique: true },
+  website: { type: String, required: true },
+  fields: { type: {}, required: true }
+}, { minimize: false }))
+
+const _Object = mongoose.model('objects', new mongoose.Schema({
+  _id: { type: String, required: true, unique: true },
+  type: { type: String, required: true },
+  website: { type: String, required: true },
+  fields: { type: {}, required: true }
+}, { minimize: false }))
 
 mongoose.Promise = Promise
 mongoose.connect('mongodb://localhost/webdesignio')
@@ -18,15 +37,93 @@ const app = express()
 app.set('view engine', 'pug')
 app.set('views', 'src')
 
+app.get('/api/v1/websites/:website', (req, res, next) => {
+  getWebsite()
+    .then(website => res.send(website))
+    .catch(next)
+})
+
+app.get('/api/v1/meta/:filename', (req, res, next) => {
+  if (!existsSync(`src/${req.params.filename}.meta.json`)) {
+    res.send({ noLangFields: [] })
+    return
+  }
+  const meta = Object.assign(
+    { noLangFields: [] },
+    JSON.parse(readFileSync(`src/${req.params.filename}.meta.json`))
+  )
+  res.send(meta)
+})
+
+app.use('/api', cors())
+
+app.get('/api/v1/:type/:id', (req, res, next) => {
+  const O = req.params.type === 'objects' ? _Object : Page
+  O.findById(req.params.id)
+    .then(o => {
+      if (o == null && req.params.type === 'pages') {
+        res.send(
+          new Page({
+            _id: req.params.id,
+            website: req.query.website,
+            fields: {}
+          })
+        )
+        return
+      }
+      res.send(o)
+    })
+    .catch(next)
+})
+
+app.put('/api/v1/objects/:object', json(), (req, res, next) => {
+  const { params: { object } } = req
+  const record = Object.assign({}, req.body, { _id: object })
+  _Object.findOne({ _id: object })
+    .then(object =>
+      object == null
+        ? new _Object(record)
+        : Object.assign(object, record)
+    )
+    .then(object => object.save())
+    .then(object => res.send(object))
+    .catch(next)
+})
+
+app.put('/api/v1/pages/:page', json(), (req, res, next) => {
+  const { params: { page } } = req
+  const record = Object.assign({}, req.body, { _id: page })
+  Page.findById(page)
+    .then(page => page == null
+      ? new Page(record)
+      : Object.assign(page, record))
+    .then(page => page.save())
+    .then(page => res.send(page), next)
+})
+
+app.put('/api/v1/websites/:website', json(), (req, res, next) => {
+  const fields = Object.keys(readPackageJSON().globals)
+    .reduce(
+      (globals, key) =>
+        Object.assign({}, globals, {
+          [key]: (req.body.fields || {})[key] || null
+        }),
+      {}
+    )
+  updateWebsite({ fields })
+    .then(website => res.send(website))
+    .catch(next)
+})
+
 app.use(express.static(`${__dirname}/static`))
 
-app.get('/static/client.js', (req, res) => {
+app.get('/client.js', (req, res) => {
   res.sendFile(`${process.cwd()}/client.js`)
 })
 
 app.get('/:type/new', (req, res, next) => {
   const o = new _Object({ type: req.params.type, data: {} })
-  render(res, o).catch(next)
+  render(res, o)
 })
 
 app.get('/:type/:object', (req, res, next) => {
@@ -34,7 +131,10 @@ app.get('/:type/:object', (req, res, next) => {
   _Object.findById(params.object)
     .then(object => object == null ? Promise.reject(error(404)) : object)
     .then(object => render(res, object))
+    .catch(next)
 })
+
+app.get('/index', (req, res) => res.redirect('/'))
 
 app.get(/\/([^/.]*)/, (req, res, next) => {
   const { params } = req
@@ -45,48 +145,6 @@ app.get(/\/([^/.]*)/, (req, res, next) => {
     .then(page => page == null ? createPage() : page)
     .then(page => render(res, page))
     .catch(next)
-})
-
-app.put('/:type/:object', json(), (req, res, next) => {
-  const { params } = req
-  const record = Object.assign({}, req.body.record, { _id: params.object })
-  const globals = Object.keys(readPackageJSON().globals)
-    .reduce(
-      (globals, key) =>
-        Object.assign({}, globals, {
-          [key]: (req.body.globals || {})[key] || null
-        }),
-      {}
-    )
-  updateWebsite({ globals })
-    .then(() => _Object.findOne({ _id: params.object, type: params.type }))
-    .then(object =>
-      object == null
-        ? new _Object(record)
-        : Object.assign(object, record)
-    )
-    .then(object => object.save())
-    .then(object => res.send(object), next)
-})
-
-app.put('/:page', json(), (req, res, next) => {
-  const { params } = req
-  const record = Object.assign({}, req.body.record, { _id: params.page })
-  const globals = Object.keys(readPackageJSON().globals)
-    .reduce(
-      (globals, key) =>
-        Object.assign({}, globals, {
-          [key]: (req.body.globals || {})[key] || null
-        }),
-      {}
-    )
-  updateWebsite({ globals })
-    .then(() => Page.findById(params.page))
-    .then(page => page == null
-      ? new Page(record)
-      : Object.assign(page, record))
-    .then(page => page.save())
-    .then(page => res.send(page), next)
 })
 
 const srv = http.createServer(app)
@@ -110,7 +168,7 @@ function getWebsite () {
     .then(website =>
       website != null
         ? website
-        : new Website({ _id: 'my-site' })
+        : new Website({ _id: 'my-site', languages: [] })
     )
     .then(patchWebsite)
 }
@@ -125,34 +183,7 @@ function render (res, record) {
   const view = record.collection.name === 'objects'
     ? `objects/${record.type}`
     : `pages/${record._id}`
-  let meta = {}
-  if (existsSync(`src/${view}.meta.json`)) {
-    meta = JSON.parse(readFileSync(`src/${view}.meta.json`))
-  }
-  meta = Object.assign({}, { noLangFields: [] }, meta)
-  return getWebsite()
-    .then(({ globals, currentLanguage, defaultLanguage, languages }) =>
-      renderView(res, view, {
-        meta,
-        record,
-        website: {
-          fields: globals,
-          noLangFields: readPackageJSON().noLangFields || [],
-          defaultLanguage,
-          languages
-        }
-      })
-    )
-    .then(html => res.send(html))
-}
-
-function renderView (res, path, o) {
-  return new Promise((resolve, reject) => {
-    res.render(path, (err, html) => {
-      if (err) return reject(err)
-      resolve(renderTemplate(html, o))
-    })
-  })
+  res.render(view, require('./pug_api.js'))
 }
 
 function readPackageJSON () {

@@ -2,6 +2,7 @@
 
 trap 'rm components/__*__.tmp.js' EXIT
 export NODE_ENV=production
+export WEBDESIGNIO_CLUSTER_URL=
 echo "Starting build" > webdesignio.log
 echo "  Transpiling component files"
 babel --out-dir components/browserify/transpiled \
@@ -31,9 +32,9 @@ browserify \
   -o client.js \
   src/client.js 2>&1 >> webdesignio.log
 echo "  Building pages"
-pug -o pages src/pages
+pug -o pages -O pug_api.js src/pages
 cp src/pages/*.meta.json pages 2>/dev/null
 echo "  Building objects"
-pug -o objects src/objects
+pug -o objects -O pug_api.js src/objects
 cp src/objects/*.meta.json objects 2>/dev/null
 echo

@@ -5,7 +5,7 @@ html
     meta(http-equiv='X-UA-Compatible' content='IE=edge')
     meta(name='viewport' content='width=device-width, initial-scale=1')
     title Bootstrap 101 Template
-    link(href='/css/bootstrap.min.css' rel='stylesheet')
+    link(href=asset('/css/bootstrap.min.css') rel='stylesheet')
   body
     .logo
       div(style='text-transform:uppercase' data-component='Inplace' data-props='{"name":"logo"}')
@@ -13,4 +13,4 @@ html
       h1.page-header(data-component='Inplace', data-props='{"name":"header"}')
     block content
     div(data-component='Toolbar')
-    script(data-cms)
+    script(data-webdesignio-remove src=asset('/client.js'))
