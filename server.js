@@ -61,15 +61,19 @@ app.get('/api/v1/:type/:id', (req, res, next) => {
   const O = req.params.type === 'objects' ? _Object : Page
   O.findById(req.params.id)
     .then(o => {
-      if (o == null && req.params.type === 'pages') {
-        res.send(
-          new Page({
-            _id: req.params.id,
-            website: req.query.website,
-            fields: {}
-          })
-        )
-        return
+      if (req.params.type === 'pages') {
+        if (o == null) {
+          res.send(
+            {
+              _id: req.params.id,
+              name: req.params.id,
+              website: req.query.website,
+              fields: {}
+            }
+          )
+          return
+        }
+        return res.send(Object.assign({}, o.toObject(), { name: o._id }))
       }
       res.send(o)
     })
@@ -92,11 +96,11 @@ app.put('/api/v1/objects/:object', json(), (req, res, next) => {
 
 app.put('/api/v1/pages/:page', json(), (req, res, next) => {
   const { params: { page } } = req
-  const record = Object.assign({}, req.body, { _id: page })
+  const { _id, fields } = Object.assign({}, req.body, { _id: page })
   Page.findById(page)
     .then(page => page == null
-      ? new Page(record)
-      : Object.assign(page, record))
+      ? new Page({ fields, _id })
+      : Object.assign(page, { fields }))
     .then(page => page.save())
     .then(page => res.send(page), next)
 })

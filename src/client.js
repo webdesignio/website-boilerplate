@@ -57,8 +57,8 @@ function bootstrap ({ meta, record, website }) {
   function saveHandler () {
     const putLocation =
       isObject
-        ? `/api/v1/objects/${record._id}`
-        : `/api/v1/pages/${record._id}`
+        ? `/api/v1/objects/${record._id}?website=${website._id}`
+        : `/api/v1/pages/${record.name}?website=${website._id}`
     store.dispatch(save())
     const { globals, locals } = store.getState()
     Promise.all(
