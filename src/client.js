@@ -50,11 +50,9 @@ function bootstrap ({ meta, record, website }) {
       window.devToolsExtension ? window.devToolsExtension() : f => f
     )
   )
-  if (process.env.NODE_ENV !== 'production') {
-    const saveButton = document.querySelector('#save')
-    if (!saveButton) return alert('No save button found :(')
-    saveButton.onclick = saveHandler
-  }
+  const saveButton = document.querySelector('#save')
+  if (!saveButton) return alert('No save button found :(')
+  saveButton.onclick = saveHandler
 
   function saveHandler () {
     const putLocation =

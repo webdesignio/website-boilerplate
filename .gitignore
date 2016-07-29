@@ -7,8 +7,9 @@
 !/objects/.keep
 /.webdesigniorc.json
 /webdesignio.log
-/client.js
+/static/client.js
 /src/components/index.js
 /data/*
 !/data/.keep
 /mongod.log
+/assets.zip

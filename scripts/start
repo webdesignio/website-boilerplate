@@ -10,7 +10,7 @@ watchify \
   -s CMS \
   -t [ babelify --presets [ react es2015 ] ] \
   -t envify \
-  -o client.js \
+  -o static/client.js \
   src/client.js \
   -v &
 node-inspector &

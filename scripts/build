@@ -29,7 +29,7 @@ browserify \
   -s CMS \
   -t [ babelify --presets [ react es2015 ] ] \
   -t envify \
-  -o client.js \
+  -o static/client.js \
   src/client.js 2>&1 >> webdesignio.log
 echo "  Building pages"
 pug -o pages -O pug_api.js src/pages
