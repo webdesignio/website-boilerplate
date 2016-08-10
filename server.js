@@ -95,12 +95,12 @@ app.put('/api/v1/objects/:object', json(), (req, res, next) => {
 })
 
 app.put('/api/v1/pages/:page', json(), (req, res, next) => {
-  const { params: { page } } = req
+  const { params: { page }, query: { website } } = req
   const { _id, fields } = Object.assign({}, req.body, { _id: page })
   Page.findById(page)
     .then(page => page == null
-      ? new Page({ fields, _id })
-      : Object.assign(page, { fields }))
+      ? new Page({ fields, website, _id })
+      : Object.assign(page, { fields, website }))
     .then(page => page.save())
     .then(page => res.send(page), next)
 })
@@ -118,6 +118,10 @@ app.put('/api/v1/websites/:website', json(), (req, res, next) => {
     .then(website => res.send(website))
     .catch(next)
 })
+
+app.post('/api/v1/websites/:website/build', (req, res) =>
+  res.send({ ok: true })
+)
 
 app.use(express.static(`${__dirname}/static`))
 
@@ -149,6 +153,14 @@ app.get(/\/([^/.]*)/, (req, res, next) => {
     .then(page => page == null ? createPage() : page)
     .then(page => render(res, page))
     .catch(next)
+})
+
+app.use((err, req, res, next) => {
+  if (err.name === 'ValidationError') {
+    res.status(400).send({ errors: err.errors, message: err.message })
+    return
+  }
+  next(err)
 })
 
 const srv = http.createServer(app)

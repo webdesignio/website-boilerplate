@@ -84,7 +84,13 @@ function bootstrap ({ meta, record, website }) {
           )
         })
       ]
-      .map(p => p.then(res => res.json()))
+      .map(p =>
+        p.then(res =>
+          ((res.status / 100) | 0) === 2
+            ? res.json()
+            : Promise.reject(res.json())
+        )
+      )
     )
     .then(([record]) => {
       store.dispatch(saveSuccess(record))
@@ -92,6 +98,11 @@ function bootstrap ({ meta, record, website }) {
         window.location = `/${record.type}/${record._id}`
       }
     })
+    .then(() =>
+      fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}/build`, {
+        method: 'POST'
+      })
+    )
     .catch(e => store.dispatch(saveFailure(e)))
   }
 }
