@@ -1,4 +1,4 @@
-/* global alert, location, fetch, Headers */
+/* global alert, location, fetch */
 
 import { parse } from 'url'
 import 'whatwg-fetch'
@@ -17,14 +17,23 @@ const isObject = pathname.split('/').length >= 3
 const type = isObject ? pathname.split('/')[1] : null
 const id = isObject ? pathname.split('/')[2] : (pathname.split('/')[1] || 'index')
 const isNew = !!pathname.match(/\/new$/)
-
+const cookies = document.cookie
+  .split(';')
+  .map(s => s.trim())
+  .reduce(
+    (cookies, pair) =>
+      Object.assign({}, cookies, { [pair.split('=')[0]]: pair.split('=')[1] }),
+    {}
+  )
+const { token } = cookies
+const bearer = `Bearer ${token}`
 Promise.all(
   [
-    fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}?website=${websiteID}`),
-    fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/meta/${isObject ? 'objects' : 'pages'}%2F${isObject ? type : id}?website=${websiteID}`),
+    fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}?website=${websiteID}`, { headers: { authorization: bearer } }),
+    fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/meta/${isObject ? 'objects' : 'pages'}%2F${isObject ? type : id}?website=${websiteID}`, { headers: { authorization: bearer } }),
     isObject && isNew
       ? Promise.resolve({ _id: shortid(), type, website: websiteID, fields: {} })
-      : fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/${isObject ? 'objects' : 'pages'}/${id}?website=${websiteID}`)
+      : fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/${isObject ? 'objects' : 'pages'}/${id}?website=${websiteID}`, { headers: { authorization: bearer } })
   ]
   .map(p =>
     p.then(res => typeof res.json === 'function' ? res.json() : res)
@@ -65,18 +74,20 @@ function bootstrap ({ meta, record, website }) {
       [
         fetch(process.env.WEBDESIGNIO_CLUSTER_URL + putLocation, {
           method: 'PUT',
-          headers: new Headers({
-            'Content-Type': 'application/json'
-          }),
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: bearer
+          },
           body: JSON.stringify(
             Object.assign({}, record, { fields: locals.fields })
           )
         }),
         fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}`, {
           method: 'PUT',
-          headers: new Headers({
-            'Content-Type': 'application/json'
-          }),
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: bearer
+          },
           body: JSON.stringify(
             Object.assign({}, website, {
               fields: globals.fields
@@ -100,7 +111,10 @@ function bootstrap ({ meta, record, website }) {
     })
     .then(() =>
       fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}/build`, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          authorization: bearer
+        }
       })
     )
     .catch(e => store.dispatch(saveFailure(e)))
