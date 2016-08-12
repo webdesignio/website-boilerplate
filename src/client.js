@@ -1,11 +1,11 @@
-/* global alert, location, fetch */
+/* global location, fetch */
 
 import { parse } from 'url'
 import 'whatwg-fetch'
 import shortid from 'shortid'
 import { compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
-import { findAndRender } from '@webdesignio/floorman'
+import { findAll, renderAll, findAndRender } from '@webdesignio/floorman'
 import { save, saveSuccess, saveFailure } from '@webdesignio/floorman/actions'
 import reduce from '@webdesignio/floorman/reducers'
 
@@ -27,21 +27,25 @@ const cookies = document.cookie
   )
 const { token } = cookies
 const bearer = `Bearer ${token}`
-Promise.all(
-  [
-    fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}?website=${websiteID}`, { headers: { authorization: bearer } }),
-    fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/meta/${isObject ? 'objects' : 'pages'}%2F${isObject ? type : id}?website=${websiteID}`, { headers: { authorization: bearer } }),
-    isObject && isNew
-      ? Promise.resolve({ _id: shortid(), type, website: websiteID, fields: {} })
-      : fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/${isObject ? 'objects' : 'pages'}/${id}?website=${websiteID}`, { headers: { authorization: bearer } })
-  ]
-  .map(p =>
-    p.then(res => typeof res.json === 'function' ? res.json() : res)
+if (!pathname.match(/\/login$/)) {
+  Promise.all(
+    [
+      fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}?website=${websiteID}`, { headers: { authorization: bearer } }),
+      fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/meta/${isObject ? 'objects' : 'pages'}%2F${isObject ? type : id}?website=${websiteID}`, { headers: { authorization: bearer } }),
+      isObject && isNew
+        ? Promise.resolve({ _id: shortid(), type, website: websiteID, fields: {} })
+        : fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/${isObject ? 'objects' : 'pages'}/${id}?website=${websiteID}`, { headers: { authorization: bearer } })
+    ]
+    .map(p =>
+      p.then(res => typeof res.json === 'function' ? res.json() : res)
+    )
   )
-)
-.then(([website, meta, record]) =>
-  bootstrap({ meta, record, website })
-)
+  .then(([website, meta, record]) =>
+    bootstrap({ meta, record, website })
+  )
+} else {
+  renderAll(findAll(components), {})
+}
 
 function bootstrap ({ meta, record, website }) {
   const store = findAndRender(
@@ -60,7 +64,7 @@ function bootstrap ({ meta, record, website }) {
     )
   )
   const saveButton = document.querySelector('#save')
-  if (!saveButton) return alert('No save button found :(')
+  if (!saveButton) return
   saveButton.onclick = saveHandler
 
   function saveHandler () {

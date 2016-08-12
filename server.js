@@ -123,6 +123,8 @@ app.post('/api/v1/websites/:website/build', (req, res) =>
   res.send({ ok: true })
 )
 
+app.post('/api/v1/tokens', (req, res) => res.send({ token: 'testtoken' }))
+
 app.use(express.static(`${__dirname}/static`))
 
 app.get('/client.js', (req, res) => {

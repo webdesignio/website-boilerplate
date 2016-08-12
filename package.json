@@ -22,6 +22,14 @@
       "header": null
     },
     "components": {
+      "LoginForm": [
+        "./LoginForm.jsx",
+        {
+          "transform": [
+            "react"
+          ]
+        }
+      ],
       "Inplace": [
         "./Inplace.jsx",
         {
