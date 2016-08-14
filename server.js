@@ -1,37 +1,79 @@
 'use strict'
 
-const { readFileSync, existsSync } = require('fs')
+const { dirname } = require('path')
+const { writeFile, readFile, readFileSync, existsSync } = require('fs')
 const http = require('http')
 const express = require('express')
 const cors = require('cors')
 const chalk = require('chalk')
-const mongoose = require('mongoose')
 const error = require('http-errors')
 const { json } = require('body-parser')
+const mkdirp = require('mkdirp')
+const Bluebird = require('bluebird')
 
-const Website = mongoose.model('websites', new mongoose.Schema({
-  _id: { type: String, required: true, unique: true },
-  defaultLanguage: { type: String, required: true },
-  languages: { type: [String], required: true },
-  noLangFields: { type: [String], required: true },
-  fields: { type: {}, required: true }
-}, { minimize: false }))
+const readFileAsync = Bluebird.promisify(readFile)
+const writeFileAsync = Bluebird.promisify(writeFile)
+const mkdirpAsync = Bluebird.promisify(mkdirp)
 
-const Page = mongoose.model('pages', new mongoose.Schema({
-  _id: { type: String, required: true, unique: true },
-  website: { type: String, required: true },
-  fields: { type: {}, required: true }
-}, { minimize: false }))
+function saveModel (path, model) {
+  return mkdirpAsync(dirname(path))
+    .then(() =>
+      writeFileAsync(
+        path,
+        JSON.stringify(model)
+      )
+      .then(() => model)
+    )
+}
 
-const _Object = mongoose.model('objects', new mongoose.Schema({
-  _id: { type: String, required: true, unique: true },
-  type: { type: String, required: true },
-  website: { type: String, required: true },
-  fields: { type: {}, required: true }
-}, { minimize: false }))
+function findById (collectionName, id) {
+  const Type = this
+  const p = `data/${collectionName}/${id}.json`
+  if (!existsSync(p)) return Promise.resolve(null)
+  return readFileAsync(p)
+    .then(content => JSON.parse(content.toString('utf-8')))
+    .then(data => new Type(data))
+}
 
-mongoose.Promise = Promise
-mongoose.connect('mongodb://localhost/webdesignio')
+class Model {
+  constructor (data) {
+    Object.assign(this, data)
+  }
+
+  toObject () {
+    return this
+  }
+}
+
+class Website extends Model {
+  save () {
+    return saveModel('data/website.json', this)
+  }
+}
+Website.prototype.collection = { name: 'websites' }
+Website.findOne = () => {
+  const p = 'data/website.json'
+  if (!existsSync(p)) return Promise.resolve(null)
+  return readFileAsync(p)
+    .then(content => JSON.parse(content.toString('utf-8')))
+    .then(data => new Website(data))
+}
+
+class Page extends Model {
+  save () {
+    return saveModel(`data/pages/${this._id}.json`, this)
+  }
+}
+Page.prototype.collection = { name: 'pages' }
+Page.findById = findById.bind(Page, 'pages')
+
+class _Object extends Model {
+  save () {
+    return saveModel(`data/objects/${this._id}.json`, this)
+  }
+}
+_Object.prototype.collection = { name: 'objects' }
+_Object.findById = findById.bind(_Object, 'objects')
 
 const app = express()
 app.set('view engine', 'pug')
@@ -83,7 +125,7 @@ app.get('/api/v1/:type/:id', (req, res, next) => {
 app.put('/api/v1/objects/:object', json(), (req, res, next) => {
   const { params: { object } } = req
   const record = Object.assign({}, req.body, { _id: object })
-  _Object.findOne({ _id: object })
+  _Object.findById(object)
     .then(object =>
       object == null
         ? new _Object(record)
@@ -186,7 +228,7 @@ function getWebsite () {
     .then(website =>
       website != null
         ? website
-        : new Website({ _id: 'my-site', languages: [] })
+        : new Website({ _id: 'my-site' })
     )
     .then(patchWebsite)
 }
@@ -215,16 +257,16 @@ function patchWebsite (website) {
     defaultLanguage,
     noLangFields
   } = readPackageJSON()
-  const globals = Object.keys(readPackageJSON().globals || {})
+  const fields = Object.keys(readPackageJSON().globals || {})
     .reduce(
       (globals, key) =>
         Object.assign({}, globals, {
-          [key]: (website.globals || {})[key] || null
+          [key]: (website.fields || {})[key] || null
         }),
       {}
     )
   return Object.assign(website, {
-    globals,
+    fields,
     languages,
     defaultLanguage,
     noLangFields
