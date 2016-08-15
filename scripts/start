@@ -4,7 +4,7 @@ export NODE_ENV=development
 export WEBDESIGNIO_CLUSTER_URL=
 trap 'kill $(jobs -p) 2>/dev/null' EXIT
 watch-run -i -p 'src/components/**,!src/components/index.js' \
-  scripts/create_component_index > src/components/index.js &
+  node scripts/create_component_index > src/components/index.js &
 watchify \
   -s CMS \
   -t [ babelify --presets [ react es2015 ] ] \
