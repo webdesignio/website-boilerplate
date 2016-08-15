@@ -30,7 +30,7 @@ const bearer = `Bearer ${token}`
 if (!pathname.match(/\/login$/)) {
   Promise.all(
     [
-      fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}?website=${websiteID}`, { headers: { authorization: bearer } }),
+      fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}`, { headers: { authorization: bearer } }),
       fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/meta/${isObject ? 'objects' : 'pages'}%2F${isObject ? type : id}?website=${websiteID}`, { headers: { authorization: bearer } }),
       isObject && isNew
         ? Promise.resolve({ _id: shortid(), type, website: websiteID, fields: {} })
