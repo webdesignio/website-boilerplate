@@ -20,7 +20,7 @@ function saveModel (path, model) {
     .then(() =>
       writeFileAsync(
         path,
-        JSON.stringify(model)
+        JSON.stringify(model, null, 2)
       )
       .then(() => model)
     )
