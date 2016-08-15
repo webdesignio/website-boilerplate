@@ -1,51 +1,40 @@
-import ReactDOM from 'react-dom'
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-
 import { update } from '@webdesignio/floorman/actions'
 import {
   createValueSelector,
   isEditable
 } from '@webdesignio/floorman/selectors'
 
-class Inplace extends Component {
-  constructor () {
-    super()
-    this.onChange = this.onChange.bind(this)
-  }
-
-  shouldComponentUpdate (nextProps) {
-    return (
-      nextProps.value !== ReactDOM.findDOMNode(this).textContent
-    ) || this.props.isEditable !== nextProps.isEditable
-  }
-
-  onChange () {
-    const html = ReactDOM.findDOMNode(this).textContent
-    if (html !== this.lastHtml) {
-      this.props.onUpdate(html)
+export default class Inplace {
+  constructor (props, el) {
+    const { store } = props
+    const propMapper = mapStateToProps()
+    const staticProps = Object.assign(
+      {},
+      props,
+      mapDispatchToProps(store.dispatch, props)
+    )
+    this.mapProps = props =>
+      Object.assign(
+        {},
+        propMapper(props.store.getState(), props),
+        staticProps
+      )
+    if (el) {
+      this.render(staticProps, el)
+      store.subscribe(() => this.render(staticProps, el))
+      el.setAttribute('contenteditable', 'true')
+      el.oninput = this.onInput.bind(this, staticProps)
     }
-    this.lastHtml = html
   }
 
-  render () {
-    const tag = this.props.tag || 'div'
-    const { value } = this.props
-    if (this.props.isEditable) {
-      return React.createElement(tag, {
-        onInput: this.onChange,
-        onBlur: this.onChange,
-        contentEditable: true,
-        className: this.props.className,
-        suppressContentEditableWarning: true,
-        children: value
-      })
-    } else {
-      return React.createElement(tag, {
-        className: this.props.className,
-        children: value
-      })
-    }
+  onInput (props, e) {
+    props.onUpdate(e.target.innerHTML)
+  }
+
+  render (props, el) {
+    const { value } = this.mapProps(props)
+    if (!el) return value
+    if (el.innerHTML !== value) el.innerHTML = value
   }
 }
 
@@ -53,7 +42,7 @@ function mapStateToProps () {
   const value = createValueSelector()
   return (state, { name }) => ({
     isEditable: isEditable(state),
-    value: value(state, name)
+    value: value(state, name) || ''
   })
 }
 
@@ -64,5 +53,3 @@ function mapDispatchToProps (dispatch, { name }) {
     }
   }
 }
-
-export default connect(mapStateToProps, mapDispatchToProps)(Inplace)

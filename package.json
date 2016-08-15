@@ -34,7 +34,7 @@
         "./Inplace.jsx",
         {
           "transform": [
-            "react"
+            "./transforms/plain"
           ]
         }
       ],
