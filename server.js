@@ -148,14 +148,7 @@ app.put('/api/v1/pages/:page', json(), (req, res, next) => {
 })
 
 app.put('/api/v1/websites/:website', json(), (req, res, next) => {
-  const fields = Object.keys(readPackageJSON().globals)
-    .reduce(
-      (globals, key) =>
-        Object.assign({}, globals, {
-          [key]: (req.body.fields || {})[key] || null
-        }),
-      {}
-    )
+  const { fields = {} } = req.body
   updateWebsite({ fields })
     .then(website => res.send(website))
     .catch(next)
@@ -255,18 +248,12 @@ function patchWebsite (website) {
   const {
     languages,
     defaultLanguage,
-    noLangFields
+    noLangFields,
+    globals
   } = readPackageJSON()
-  const fields = Object.keys(readPackageJSON().globals || {})
-    .reduce(
-      (globals, key) =>
-        Object.assign({}, globals, {
-          [key]: (website.fields || {})[key] || null
-        }),
-      {}
-    )
   return Object.assign(website, {
-    fields,
+    fields: website.fields || {},
+    fieldKeys: globals,
     languages,
     defaultLanguage,
     noLangFields

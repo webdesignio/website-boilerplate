@@ -48,12 +48,18 @@ if (!pathname.match(/\/login$/)) {
 }
 
 function bootstrap ({ meta, record, website }) {
+  const globalFields = website.fieldKeys
+    .reduce(
+      (fields, key) =>
+        Object.assign({}, fields, { [key]: website.fields[key] || null }),
+      {}
+    )
   const store = findAndRender(
     components,
     reduce,
     {
       locals: Object.assign({}, meta, { fields: record.fields }),
-      globals: { noLangFields: website.noLangFields, fields: website.fields },
+      globals: { noLangFields: website.noLangFields, fields: globalFields },
       defaultLanguage: website.defaultLanguage,
       languages: website.languages,
       currentLanguage: website.defaultLanguage || website.languages[0]

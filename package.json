@@ -17,10 +17,10 @@
     "noLangFields": [
       "logo"
     ],
-    "globals": {
-      "logo": null,
-      "header": null
-    },
+    "globals": [
+      "logo",
+      "header"
+    ],
     "components": {
       "LoginForm": [
         "./LoginForm.jsx",
