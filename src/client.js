@@ -30,7 +30,7 @@ const bearer = `Bearer ${token}`
 if (!pathname.match(/\/login$/)) {
   Promise.all(
     [
-      fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}`, { headers: { authorization: bearer } }),
+      fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites?website=${websiteID}`, { headers: { authorization: bearer } }),
       fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/meta/${isObject ? 'objects' : 'pages'}%2F${isObject ? type : id}?website=${websiteID}`, { headers: { authorization: bearer } }),
       isObject && isNew
         ? Promise.resolve({ _id: shortid(), type, website: websiteID, fields: {} })
@@ -92,7 +92,7 @@ function bootstrap ({ meta, record, website }) {
             Object.assign({}, record, { fields: locals.fields })
           )
         }),
-        fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}`, {
+        fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites?website=${websiteID}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ function bootstrap ({ meta, record, website }) {
       }
     })
     .then(() =>
-      fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/${websiteID}/build`, {
+      fetch(`${process.env.WEBDESIGNIO_CLUSTER_URL}/api/v1/websites/build?website=${websiteID}`, {
         method: 'POST',
         headers: {
           authorization: bearer
