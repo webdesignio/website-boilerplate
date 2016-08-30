@@ -79,7 +79,7 @@ const app = express()
 app.set('view engine', 'pug')
 app.set('views', 'src')
 
-app.get('/api/v1/websites/:website', (req, res, next) => {
+app.get('/api/v1/websites', (req, res, next) => {
   getWebsite()
     .then(website => res.send(website))
     .catch(next)
@@ -147,14 +147,14 @@ app.put('/api/v1/pages/:page', json(), (req, res, next) => {
     .then(page => res.send(page), next)
 })
 
-app.put('/api/v1/websites/:website', json(), (req, res, next) => {
+app.put('/api/v1/websites', json(), (req, res, next) => {
   const { fields = {} } = req.body
   updateWebsite({ fields })
     .then(website => res.send(website))
     .catch(next)
 })
 
-app.post('/api/v1/websites/:website/build', (req, res) =>
+app.post('/api/v1/websites/build', (req, res) =>
   res.send({ ok: true })
 )
 
