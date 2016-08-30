@@ -60,7 +60,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@webdesignio/client": "0.0.0",
+    "@webdesignio/client": "0.0.1",
     "@webdesignio/floorman": "^1.0.0",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.5.0",
