@@ -44,17 +44,54 @@ if (!pathname.match(/\/login$/)) {
     .then(r => {
       let res = r
       const { state } = res
-      const store = findAndRender(components, reduce, state, middleware)
+      const store = findAndRender(
+        components,
+        saveStateReducer(reduce),
+        state,
+        middleware
+      )
       const saveButton = document.querySelector('#save')
       if (!saveButton) return
       saveButton.onclick = () => {
+        store.dispatch({ type: 'SAVE' })
         client.save(res, store.getState())
           .then(r => {
             res = r
+            store.dispatch({ type: 'SAVE_SUCCESS' })
             return client.triggerBuild()
+          })
+          .catch(() => {
+            store.dispatch({ type: 'SAVE_FAILURE' })
           })
       }
     })
 } else {
   renderAll(findAll(components), {})
+}
+
+function saveStateReducer (child) {
+  return (state, action) => {
+    const coreState = Object.assign({}, state)
+    delete coreState.success
+    delete coreState.isSaving
+    return saveState(Object.assign({}, state, child(coreState, action)), action)
+  }
+
+  function saveState (state, action) {
+    switch (action.type) {
+      case 'SAVE':
+        return Object.assign({}, state, { isSaving: true })
+      case 'SAVE_SUCCESS':
+      case 'SAVE_FAILURE':
+        return Object.assign({}, state, {
+          isSaving: false,
+          success: action.type === 'SAVE_SUCCESS'
+        })
+      default:
+        return Object.assign({}, state, {
+          isSaving: !!state.isSaving,
+          success: state.success == null ? true : state.success
+        })
+    }
+  }
 }

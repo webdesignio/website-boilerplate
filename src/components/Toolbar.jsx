@@ -19,10 +19,17 @@ const styles = {
   }
 }
 
+const renderSavingIndicator = () =>
+  <div>
+    <i className='fa fa-spin fa-gears' />&nbsp;
+    Saving ...
+  </div>
+
 function Toolbar ({
   isEditable,
   currentLanguage,
   languages,
+  isSaving,
   onClickToggle,
   onChangeLanguage
 }) {
@@ -34,6 +41,9 @@ function Toolbar ({
       >
         {isEditable ? 'Anzeigen' : 'Editieren'}
       </button>
+      <div>
+        {isSaving ? renderSavingIndicator() : null}
+      </div>
       <div>
         <select
           className='form-control'
@@ -58,6 +68,7 @@ function Toolbar ({
 function mapStateToProps (state) {
   return {
     isEditable: isEditable(state),
+    isSaving: state.isSaving,
     currentLanguage: currentLanguage(state),
     languages: languages(state)
   }
