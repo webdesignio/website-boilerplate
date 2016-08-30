@@ -92,7 +92,7 @@ app.get('/api/v1/meta/:filename', (req, res, next) => {
   }
   const meta = Object.assign(
     { noLangFields: [] },
-    JSON.parse(readFileSync(`src/${req.params.filename}.meta.json`))
+    JSON.parse(readFileSync(`${req.params.filename}.meta.json`))
   )
   res.send(meta)
 })
@@ -161,10 +161,6 @@ app.post('/api/v1/websites/build', (req, res) =>
 app.post('/api/v1/tokens', (req, res) => res.send({ token: 'testtoken' }))
 
 app.use(express.static(`${__dirname}/static`))
-
-app.get('/client.js', (req, res) => {
-  res.sendFile(`${process.cwd()}/client.js`)
-})
 
 app.get('/:type/new', (req, res, next) => {
   const o = new _Object({ type: req.params.type, data: {} })
@@ -236,7 +232,7 @@ function render (res, record) {
   const view = record.collection.name === 'objects'
     ? `objects/${record.type}`
     : `pages/${record._id}`
-  res.render(view, require('./pug_api.js'))
+  res.sendFile(`${process.cwd()}/${view}.html`)
 }
 
 function readPackageJSON () {

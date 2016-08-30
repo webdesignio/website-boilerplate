@@ -3,8 +3,10 @@
 !/components/.keep
 /pages/*
 !/pages/.keep
+!/pages/*.meta.json
 /objects/*
 !/objects/.keep
+!/objects/*.meta.json
 /.webdesigniorc.json
 /webdesignio.log
 /static/client.js

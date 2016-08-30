@@ -10,8 +10,7 @@ import createClient, { createContext } from '@webdesignio/client'
 
 import components from './components'
 
-const { pathname, hostname } = parse(location.href)
-const websiteID = hostname.split('.')[0]
+const { pathname } = parse(location.href)
 const isObject = pathname.split('/').length >= 3
 const type = isObject ? pathname.split('/')[1] : null
 const id = isObject ? pathname.split('/')[2] : (pathname.split('/')[1] || 'index')
@@ -30,7 +29,7 @@ const client = createClient(
     clusterURL: process.env.WEBDESIGNIO_CLUSTER_URL,
     isObject,
     isNew,
-    websiteID,
+    websiteID: process.env.WEBDESIGNIO_WEBSITE,
     token
   })
 )
