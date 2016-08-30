@@ -6,8 +6,8 @@ import { compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 import { findAll, renderAll, findAndRender } from '@webdesignio/floorman'
 import reduce from '@webdesignio/floorman/reducers'
+import createClient, { createContext } from '@webdesignio/client'
 
-import createClient, { createContext } from './client_lib'
 import components from './components'
 
 const { pathname, hostname } = parse(location.href)
