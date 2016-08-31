@@ -22,19 +22,12 @@
       "header"
     ],
     "components": {
+      "Inplace": "@webdesignio/inplace",
       "LoginForm": [
         "./LoginForm.jsx",
         {
           "transform": [
             "react"
-          ]
-        }
-      ],
-      "Inplace": [
-        "./Inplace.jsx",
-        {
-          "transform": [
-            "./transforms/plain"
           ]
         }
       ],
@@ -62,6 +55,7 @@
   "dependencies": {
     "@webdesignio/client": "0.0.1",
     "@webdesignio/floorman": "^1.1.0",
+    "@webdesignio/inplace": "^1.0.0",
     "babel-core": "^6.14.0",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.5.0",
