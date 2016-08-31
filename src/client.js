@@ -70,12 +70,7 @@ if (!pathname.match(/\/login$/)) {
 }
 
 function saveStateReducer (child) {
-  return (state, action) => {
-    const coreState = Object.assign({}, state)
-    delete coreState.success
-    delete coreState.isSaving
-    return saveState(Object.assign({}, state, child(coreState, action)), action)
-  }
+  return (state, action) => saveState(child(state, action), action)
 
   function saveState (state, action) {
     switch (action.type) {

@@ -144,7 +144,10 @@ app.put('/api/v1/pages/:page', json(), (req, res, next) => {
       ? new Page({ fields, website, _id })
       : Object.assign(page, { fields, website }))
     .then(page => page.save())
-    .then(page => res.send(page), next)
+    .then(page =>
+      res.send(Object.assign({}, page, { name: page._id })),
+      next
+    )
 })
 
 app.put('/api/v1/websites', json(), (req, res, next) => {
