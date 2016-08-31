@@ -6,6 +6,7 @@ const { spawn } = require('child_process')
 const glob = require('glob')
 const gaze = require('gaze')
 const pug = require('pug')
+const { cp } = require('shelljs')
 
 let rc
 try {
@@ -25,13 +26,25 @@ const env = Object.assign({}, process.env, {
   FORCE_COLOR: 'true'
 })
 
+glob.sync('src/@(pages|objects)/*.html').forEach(copyTemplate)
 glob.sync('src/@(pages|objects)/*.pug').forEach(buildTemplate)
+gaze('src/@(pages|objects)/*.html', (err, watcher) => {
+  if (err) throw err
+  const onBuild = p => copyTemplate(relative(process.cwd(), p))
+  watcher.on('changed', onBuild)
+  watcher.on('added', onBuild)
+})
 gaze('src/@(pages|objects)/*.pug', (err, watcher) => {
   if (err) throw err
   const onBuild = p => buildTemplate(relative(process.cwd(), p))
   watcher.on('changed', onBuild)
   watcher.on('added', onBuild)
 })
+
+function copyTemplate (file) {
+  console.log('copy template', file)
+  cp(file, file.replace(/^src\//, ''))
+}
 
 function buildTemplate (file) {
   const api = require(`${process.cwd()}/pug_api`)
