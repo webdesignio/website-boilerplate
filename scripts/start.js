@@ -1,12 +1,11 @@
 #!/bin/bash
 
-const { writeFile } = require('fs')
 const { relative } = require('path')
 const { spawn } = require('child_process')
 const glob = require('glob')
 const gaze = require('gaze')
-const pug = require('pug')
-const { cp } = require('shelljs')
+
+const { copyTemplate, compilePugTemplate } = require('./lib/templates')
 
 let rc
 try {
@@ -27,7 +26,7 @@ const env = Object.assign({}, process.env, {
 })
 
 glob.sync('src/@(pages|objects)/*.html').forEach(copyTemplate)
-glob.sync('src/@(pages|objects)/*.pug').forEach(buildTemplate)
+glob.sync('src/@(pages|objects)/*.pug').forEach(compilePugTemplate)
 gaze('src/@(pages|objects)/*.html', (err, watcher) => {
   if (err) throw err
   const onBuild = p => copyTemplate(relative(process.cwd(), p))
@@ -36,25 +35,10 @@ gaze('src/@(pages|objects)/*.html', (err, watcher) => {
 })
 gaze('src/@(pages|objects)/*.pug', (err, watcher) => {
   if (err) throw err
-  const onBuild = p => buildTemplate(relative(process.cwd(), p))
+  const onBuild = p => compilePugTemplate(relative(process.cwd(), p))
   watcher.on('changed', onBuild)
   watcher.on('added', onBuild)
 })
-
-function copyTemplate (file) {
-  console.log('copy template', file)
-  cp(file, file.replace(/^src\//, ''))
-}
-
-function buildTemplate (file) {
-  const api = require(`${process.cwd()}/pug_api`)
-  console.log('compile template', file)
-  const fn = pug.compileFile(file)
-  return writeFile(
-    file.replace(/^src\//, '').replace(/pug$/, 'html'),
-    fn(api)
-  )
-}
 
 spawn('watch-run', [
   '-i', '-p', 'src/pages/**,src/objects/**',
