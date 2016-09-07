@@ -76,8 +76,6 @@ _Object.prototype.collection = { name: 'objects' }
 _Object.findById = findById.bind(_Object, 'objects')
 
 const app = express()
-app.set('view engine', 'pug')
-app.set('views', 'src')
 
 app.get('/api/v1/websites', (req, res, next) => {
   getWebsite()
