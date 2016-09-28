@@ -29,22 +29,6 @@
             "react"
           ]
         }
-      ],
-      "MyComponent": [
-        "./MyComponent.jsx",
-        {
-          "transform": [
-            "react"
-          ]
-        }
-      ],
-      "Toolbar": [
-        "./Toolbar.jsx",
-        {
-          "transform": [
-            "react"
-          ]
-        }
       ]
     }
   },

@@ -4,7 +4,7 @@ html
     meta(charset='utf-8')
     meta(http-equiv='X-UA-Compatible' content='IE=edge')
     meta(name='viewport' content='width=device-width, initial-scale=1')
-    title webdesignio boilerplate
+    title Webdesign.io
 
     link(rel='apple-touch-icon-precomposed', sizes='57x57', href=asset('/ico/apple-touch-icon-57x57.png'))
     link(rel='apple-touch-icon-precomposed', sizes='114x114', href=asset('/ico/apple-touch-icon-114x114.png'))
@@ -28,12 +28,69 @@ html
     meta(name='msapplication-square310x310logo', content=asset('/ico/mstile-310x310.png'))
 
     link(href=asset('/css/bootstrap.min.css') rel='stylesheet')
+    link(href=asset('/css/style.css') rel='stylesheet')
+    link(href=asset('/css/icons.css') rel='stylesheet')
 
   body
-    .logo
-      div(style='text-transform:uppercase' data-component='Inplace' data-props='{"name":"logo"}')
-    .header
-      h1.page-header(data-component='Inplace', data-props='{"name":"header"}')
+
+    block navigation
+      header.header
+        .container: .row
+          .col-sm-4
+            h1.logo Webdesign.io
+          .burger-menu
+            span
+            span
+            span
+            span
+          nav.header-nav.col-sm-8.col-xs-12.text-right
+            ul.list-inline
+              li
+                a(href='./') Home
+              li
+                a(href='./pricing') Pricing
+              li
+                a(href='https://www.github.com/webdesignio/webdesignio/wiki') Documentation
+              //- li
+                a(href) Log In
+              li(data-webdesignio-remove)
+                a#save(href) SAVE
+
+
     block content
-    div(data-webdesignio-remove data-component='Toolbar')
+
+
+    footer.footer
+      .container: .row
+        .col-md-3.col-sm-4.col-xs-12
+          h5.text-white.mb-20 Get In Touch
+          p: a(href) hello@webdesignio.com
+          p.mt-20
+            | websites einfach smart,
+            br
+            | Björn Schmidtke
+            br
+            | Gustav-Jourdan-Weg 10
+            br
+            | 72534 Hayingen
+            br
+            | Germany
+        .col-md-6.col-sm-4.footer-logo.hidden-xs
+        .col-md-3.col-sm-4.col-xs-12.text-right.mt-xs-30
+          h5.text-white.mb-20 Share The Love
+          ul.social.list-inline
+            li
+              a(href).social-icon.icon-twitter
+            li
+              a(href).social-icon.icon-facebook
+            li
+              a(href).social-icon.icon-linkedin
+        .col-xs-12.text-center.mt-60.mt-xs-40
+          p.op-02 © Webdesign.io — All rights reserved.
+
+    //- div(data-webdesignio-remove data-component='Toolbar')
     script(data-webdesignio-remove src=asset('/client.js'))
+    script(src=asset('/js/vendor/jquery.min.js'))
+    script(src=asset('/js/scripts.js'))
+
+    block scripts

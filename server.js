@@ -176,6 +176,8 @@ app.get('/:type/:object', (req, res, next) => {
     .catch(next)
 })
 
+app.post('/login', (req, res) => res.redirect('/'))
+
 app.get('/index', (req, res) => res.redirect('/'))
 
 app.get(/\/([^/.]*)/, (req, res, next) => {

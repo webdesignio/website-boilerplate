@@ -1,6 +1,26 @@
-doctype html
-html
-  head
-  body
-    div(data-component='LoginForm')
-    script(data-webdesignio-remove src=asset('/client.js'))
+extends ../includes/base
+
+block navigation
+
+  header.header
+    .container: .row
+      .col-sm-4.col-xs-12
+        h1.logo Webdesign.io
+
+block content
+
+  section.hero.hero-inner
+    .container
+      .form.text-center.pt-120.pt-md-100.pt-xs-20.pb-140.pb-xs-40
+        div(data-component='LoginForm')
+
+    .mountain-1
+    .mountain-2
+
+block scripts
+
+  script(src=asset('/js/vendor/jquery.stellar.js'))
+  script.
+    $(function(){
+      $.stellar({ responsive: true });
+    });
