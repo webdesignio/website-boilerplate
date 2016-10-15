@@ -52,7 +52,8 @@ if (!pathname.match(/\/login$/)) {
       )
       const saveButton = document.querySelector('#save')
       if (!saveButton) return
-      saveButton.onclick = () => {
+      saveButton.onclick = e => {
+        e.preventDefault()
         store.dispatch({ type: 'SAVE' })
         client.save(res, store.getState())
           .then(r => {
