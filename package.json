@@ -1,7 +1,7 @@
 {
   "name": "website-boilerplate",
   "version": "1.0.0",
-  "description": "",
+  "description": "This is a simple boilerplate to get started with a webdesignio website.",
   "main": "index.js",
   "scripts": {
     "start": "node scripts/start",
@@ -22,8 +22,16 @@
     ],
     "components": {
       "Inplace": "@webdesignio/inplace",
+      "SaveSuccessIndicator": [
+        "./save_success_indicator_container.jsx",
+        {
+          "transform": [
+            "react"
+          ]
+        }
+      ],
       "LoginForm": [
-        "./LoginForm.jsx",
+        "./login_form.jsx",
         {
           "transform": [
             "react"
@@ -38,8 +46,8 @@
   "dependencies": {
     "@webdesignio/client": "0.0.1",
     "@webdesignio/dozer": "0.0.3",
-    "@webdesignio/floorman": "^1.1.0",
-    "@webdesignio/inplace": "^1.0.0",
+    "@webdesignio/floorman": "^1.2.0",
+    "@webdesignio/inplace": "^1.2.3",
     "@webdesignio/react": "0.0.0",
     "babel-preset-es2015": "^6.14.0",
     "babel-preset-react": "^6.11.1",
@@ -60,6 +68,7 @@
     "redux": "^3.5.2",
     "redux-thunk": "^2.1.0",
     "rollupify": "^0.3.4",
+    "styled-components": "^1.0.8",
     "uglify-js": "^2.7.3",
     "watch-run": "^1.2.4",
     "watchify": "^3.7.0",
@@ -69,5 +78,13 @@
     "http-errors": "^1.5.0",
     "node-dev": "^3.1.3",
     "standard": "^7.1.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webdesignio/website-boilerplate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/webdesignio/website-boilerplate/issues"
+  },
+  "homepage": "https://github.com/webdesignio/website-boilerplate#readme"
 }

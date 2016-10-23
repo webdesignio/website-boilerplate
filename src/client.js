@@ -2,10 +2,10 @@
 
 import { parse } from 'url'
 import 'whatwg-fetch'
-import { compose, applyMiddleware } from 'redux'
+import { compose, applyMiddleware, combineReducers } from 'redux'
 import thunk from 'redux-thunk'
 import { findAll, renderAll, findAndRender } from '@webdesignio/floorman'
-import reduce from '@webdesignio/floorman/reducers'
+import { map as reducers } from '@webdesignio/floorman/reducers'
 import createClient, { createContext } from '@webdesignio/client'
 
 import components from './components'
@@ -40,16 +40,14 @@ const middleware =
   )
 
 if (!pathname.match(/\/login$/)) {
+  const enhancedReducers = Object.assign({}, reducers, additionalReducers())
+  const reduce = combineReducers(enhancedReducers)
   client.fetch({ type, id })
     .then(r => {
       let res = r
       const { state } = res
-      const store = findAndRender(
-        components,
-        saveStateReducer(reduce),
-        state,
-        middleware
-      )
+      const store = findAndRender(components, reduce, state, middleware)
+      const flash = createFlash(store)
       const saveButton = document.querySelector('#save')
       if (!saveButton) return
       saveButton.onclick = e => {
@@ -59,9 +57,11 @@ if (!pathname.match(/\/login$/)) {
           .then(r => {
             res = r
             store.dispatch({ type: 'SAVE_SUCCESS' })
+            flash({ message: 'Successfully saved! Publishing page ...' })
             return client.triggerBuild()
           })
           .catch(() => {
+            flash({ type: 'error', message: 'Failed to save!' })
             store.dispatch({ type: 'SAVE_FAILURE' })
           })
       }
@@ -70,24 +70,42 @@ if (!pathname.match(/\/login$/)) {
   renderAll(findAll(components), {})
 }
 
-function saveStateReducer (child) {
-  return (state, action) => saveState(child(state, action), action)
+function createFlash (store, { showTime = 2000 } = {}) {
+  let flashID = 0
+  let timeout = null
+  return function flash ({ type = 'success', message }) {
+    const id = ++flashID
+    store.dispatch({ type: 'SHOW_FLASH', flash: { type, message } })
+    if (timeout) clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      if (flashID === id) store.dispatch({ type: 'CLEAR_FLASH' })
+    }, showTime)
+  }
+}
 
-  function saveState (state, action) {
+function additionalReducers () {
+  return { flash, isSaving }
+
+  function flash (state = null, action) {
+    switch (action.type) {
+      case 'SHOW_FLASH':
+        return action.flash
+      case 'CLEAR_FLASH':
+        return null
+      default:
+        return state
+    }
+  }
+
+  function isSaving (state = false, action) {
     switch (action.type) {
       case 'SAVE':
-        return Object.assign({}, state, { isSaving: true })
+        return true
       case 'SAVE_SUCCESS':
       case 'SAVE_FAILURE':
-        return Object.assign({}, state, {
-          isSaving: false,
-          success: action.type === 'SAVE_SUCCESS'
-        })
+        return false
       default:
-        return Object.assign({}, state, {
-          isSaving: !!state.isSaving,
-          success: state.success == null ? true : state.success
-        })
+        return state
     }
   }
 }
