@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {{> meta}}
+    <title>{{title}}</title>
+    {{> links}}
+  </head>
+  <body>
+    <div data-component="SaveSuccessIndicator"></div>
+    <header class="header" data-component="Header"></header>
+    <section class="hero">
+      <div class="container">
+        <div class="row">
+          <div class="hero-text text-center">
+            <h1 class="mb-0 mt-30" data-component="Inplace" data-props="{&quot;name&quot;:&quot;title&quot;}">Your first webdesign.io page!</h1><a class="btn btn-lg mt-30" href="https://www.webdesignio.com" target="_blank">Read The Docs</a>
+          </div>
+        </div>
+      </div>
+      <div class="mountain-1"></div>
+      <div class="mountain-2"></div>
+    </section>
+    <section class="starter-info bg-light-blue pt-80 pt-xs-60 pb-140 pb-sm-100 pb-xs-0">
+      <div class="container pb-140">
+        <ul class="row list-inline">
+          <li class="col-sm-4 text-center mb-40">
+            <div class="icon-large icon-signs mb-20"></div>
+            <h4 data-component="Inplace" data-props="{&quot;name&quot;:&quot;feature-1&quot;}">EDIT TEXT INLINE</h4>
+            <p>When you enter into any new area of science, you almost always find yourself with a baffling new language of technical terms to learn before you can converse with the experts.</p>
+          </li>
+          <li class="col-sm-4 text-center mb-40">
+            <div class="icon-large icon-expand mb-20"></div>
+            <h4>RESIZE IMAGES</h4>
+            <p>When you enter into any new area of science, you almost always find yourself with a baffling new language of technical terms to learn before you can converse with the experts.</p>
+          </li>
+          <li class="col-sm-4 text-center mb-40">
+            <div class="icon-large icon-text mb-20"></div>
+            <h4>FULL TEXT EDITOR</h4>
+            <p>
+              When you enter into any new area of science, you almost always find yourself with a baffling new language of technical terms to learn before you can converse with the experts.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </section>
+    <div data-component='Footer'></div>
+    <script src="{{assets}}/client.js"></script>
+    <script src="{{assets}}/js/vendor/jquery.min.js"></script>
+    <script src="{{assets}}/js/scripts.js"></script>
+    <script src="{{assets}}/js/vendor/jquery.stellar.js"></script>
+    <script>
+      $(function(){
+        $.stellar({ responsive: true });
+      });
+    </script>
+  </body>
+</html>

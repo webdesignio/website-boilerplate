@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {{> meta}}
+    <title>{{title}}</title>
+    {{> links}}
+  </head>
+  <body>
+    <header class="header">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-4 col-xs-12">
+            <h1 class="logo">Webdesign.io</h1>
+          </div>
+        </div>
+      </div>
+    </header>
+    <section class="hero hero-inner">
+      <div class="container">
+        <div class="form text-center pt-120 pt-md-100 pt-xs-20 pb-140 pb-xs-40">
+          <div data-component="LoginForm"></div>
+        </div>
+      </div>
+      <div class="mountain-1"></div>
+      <div class="mountain-2"></div>
+    </section>
+    <div data-component='Footer'></div>
+    <script src="{{assets}}/client.js"></script>
+    <script src="{{assets}}/js/vendor/jquery.min.js"></script>
+    <script src="{{assets}}/js/scripts.js"></script>
+    <script src="{{assets}}/js/vendor/jquery.stellar.js"></script>
+    <script>
+      $(function(){
+        $.stellar({ responsive: true });
+      });
+    </script>
+  </body>
+</html>

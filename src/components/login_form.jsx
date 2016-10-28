@@ -1,8 +1,10 @@
 /* global fetch */
 
+import { parse } from 'url'
 import React, { Component } from 'react'
+import connectToField from '@webdesignio/react/connectToField'
 
-export default class LoginFormContainer extends Component {
+class LoginFormContainer extends Component {
   constructor () {
     super()
     this.handlers = {
@@ -17,6 +19,19 @@ export default class LoginFormContainer extends Component {
       token: null,
       isValidating: false,
       isRedirecting: false
+    }
+  }
+
+  componentDidMount () {
+    if (!this.props.isEditable) {
+      const clusterURL = parse(this.props.webdesignio.clusterURL)
+      const url =
+        clusterURL.protocol +
+        '//' +
+        this.props.webdesignio.websiteID +
+        '.' +
+        clusterURL.host + '/login'
+      window.location.href = url
     }
   }
 
@@ -82,10 +97,16 @@ function LoginForm ({
   error,
   isValidating,
   isRedirecting,
+  isEditable,
   onChangeEmail,
   onChangePassword,
   onClickSubmit
 }) {
+  if (!isEditable) {
+    return (
+      <p>Redirecting ...</p>
+    )
+  }
   return (
     <form className='pb-100' action='/login' method='POST'>
       {error ? renderError({ error }) : null}
@@ -138,3 +159,5 @@ function LoginForm ({
     </form>
   )
 }
+
+export default connectToField({ defaultName: 'login' })(LoginFormContainer)

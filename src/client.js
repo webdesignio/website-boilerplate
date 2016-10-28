@@ -2,16 +2,16 @@
 
 import { parse } from 'url'
 import 'whatwg-fetch'
-import { compose, applyMiddleware, combineReducers } from 'redux'
+import { createStore, compose, applyMiddleware, combineReducers } from 'redux'
 import thunk from 'redux-thunk'
-import { findAll, renderAll, findAndRender } from '@webdesignio/floorman'
+import { findAll, renderAll } from '@webdesignio/floorman'
 import { map as reducers } from '@webdesignio/floorman/reducers'
 import createClient, { createContext } from '@webdesignio/client'
 
 import components from './components'
 
-const { pathname } = parse(location.href)
-const isObject = pathname.split('/').length >= 3
+const { host, pathname } = parse(location.href)
+const isObject = pathname.split('/').length >= 3 && !!pathname.split('/')[2]
 const type = isObject ? pathname.split('/')[1] : null
 const id = isObject ? pathname.split('/')[2] : (pathname.split('/')[1] || 'index')
 const isNew = !!pathname.match(/\/new$/)
@@ -39,36 +39,47 @@ const middleware =
     window.devToolsExtension ? window.devToolsExtension() : f => f
   )
 
-if (!pathname.match(/\/login$/)) {
-  const enhancedReducers = Object.assign({}, reducers, additionalReducers())
-  const reduce = combineReducers(enhancedReducers)
-  client.fetch({ type, id })
-    .then(r => {
-      let res = r
-      const { state } = res
-      const store = findAndRender(components, reduce, state, middleware)
-      const flash = createFlash(store)
-      const saveButton = document.querySelector('#save')
-      if (!saveButton) return
-      saveButton.onclick = e => {
-        e.preventDefault()
-        store.dispatch({ type: 'SAVE' })
-        client.save(res, store.getState())
-          .then(r => {
-            res = r
-            store.dispatch({ type: 'SAVE_SUCCESS' })
-            flash({ message: 'Successfully saved! Publishing page ...' })
-            return client.triggerBuild()
-          })
-          .catch(() => {
-            flash({ type: 'error', message: 'Failed to save!' })
-            store.dispatch({ type: 'SAVE_FAILURE' })
-          })
-      }
+const enhancedReducers = Object.assign({}, reducers, additionalReducers())
+const reduce = combineReducers(enhancedReducers)
+client.fetch({ type, id })
+  .then(r => {
+    let res = r
+    const { state } = res
+    const clusterURL = parse(process.env.WEBDESIGNIO_CLUSTER_URL)
+    const editingHost =
+      process.env.WEBDESIGNIO_WEBSITE + '.' + clusterURL.host
+    const isEditable = process.env.NODE_ENV === 'production'
+      ? editingHost === host
+      : true
+    const store = createStore(reduce, Object.assign({}, state, { isEditable }), middleware)
+    renderAll(findAll(components), {
+      store,
+      webdesignio: {
+        clusterURL: process.env.WEBDESIGNIO_CLUSTER_URL,
+        websiteID: process.env.WEBDESIGNIO_WEBSITE
+      },
+      onSave
     })
-} else {
-  renderAll(findAll(components), {})
-}
+    const flash = createFlash(store)
+    const saveButton = document.querySelector('#save')
+    if (saveButton) {
+      saveButton.onclick = e => { e.preventDefault(); onSave() }
+    }
+    function onSave () {
+      store.dispatch({ type: 'SAVE' })
+      client.save(res, store.getState())
+        .then(r => {
+          res = r
+          store.dispatch({ type: 'SAVE_SUCCESS' })
+          flash({ message: 'Successfully saved! Publishing page ...' })
+          return client.triggerBuild()
+        })
+        .catch(() => {
+          flash({ type: 'error', message: 'Failed to save!' })
+          store.dispatch({ type: 'SAVE_FAILURE' })
+        })
+    }
+  })
 
 function createFlash (store, { showTime = 2000 } = {}) {
   let flashID = 0
